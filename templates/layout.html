@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MealMate{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9f1f7 100%);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #ffffff;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #a7f3d0;
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #34d399;
+            border-radius: 4px;
+        }
+
+        /* Responsive Navigation Menu */
+        #mobile-menu {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #desktop-menu {
+                display: none;
+            }
+
+            #mobile-menu {
+                display: block;
+            }
+        }
+
+        /* Header transition */
+        .nav-hidden {
+            transform: translateY(-100%);
+        }
+
+        /* Footer spacing */
+        main {
+            padding-bottom: 6rem; /* Adjust this value as needed */
+        }
+
+        footer {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Night mode styles */
+        .night-mode {
+            background: #1a202c;
+            color: #e2e8f0;
+        }
+
+        .night-mode .bg-white {
+            background-color: #2d3748;
+        }
+
+        .night-mode .text-gray-800 {
+            color: #e2e8f0;
+        }
+
+        .night-mode .text-gray-700 {
+            color: #a0aec0;
+        }
+
+        .night-mode .bg-gradient-to-r {
+            background-image: linear-gradient(to right, #2d3748, #1a202c);
+        }
+
+        /* Toggle switch styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen" id="body">
+    <!-- Navigation Bar -->
+    <nav id="main-nav" class="bg-gradient-to-r from-green-600 to-teal-500 bg-opacity-80 backdrop-filter backdrop-blur-lg text-white p-4 shadow-lg fixed w-full z-50 transition-transform duration-300">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-bold animate__animated animate__fadeIn">
+                <i class="fas fa-utensils mr-2"></i>MealMate
+            </a>
+            <!-- Desktop Menu -->
+            <div id="desktop-menu" class="hidden md:flex space-x-6 items-center">
+                <a href="/" class="nav-link text-lg hover:text-green-200 transition duration-300">
+                    <i class="fas fa-home mr-2"></i>Home
+                </a>
+                {% if session['user_id'] %}
+                <a href="/profile" class="nav-link text-lg hover:text-green-200 transition duration-300">
+                    <i class="fas fa-user mr-2"></i>Profile
+                </a>
+                <form action="/logout" method="post" class="inline">
+                    <button type="submit" class="nav-link text-lg hover:text-green-200 transition duration-300">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </form>
+                {% else %}
+                <a href="/login" class="nav-link text-lg hover:text-green-200 transition duration-300">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </a>
+                <a href="/signup" class="nav-link text-lg hover:text-green-200 transition duration-300">
+                    <i class="fas fa-user-plus mr-2"></i>Signup
+                </a>
+                {% endif %}
+                <!-- Night Mode Toggle -->
+                <label class="switch ml-4 flex items-center">
+                    <input type="checkbox" id="nightModeToggle">
+                    <span class="slider"></span>
+                    <i class="fas fa-moon ml-2 text-gray-300"></i>
+                </label>
+            </div>
+            <!-- Mobile Menu Button -->
+            <button id="menu-button" class="md:hidden text-2xl focus:outline-none">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="bg-gradient-to-r from-green-600 to-teal-500 bg-opacity-80 backdrop-filter backdrop-blur-lg text-white p-4 md:hidden hidden">
+            <a href="/" class="block nav-link text-lg py-2">
+                <i class="fas fa-home mr-2"></i>Home
+            </a>
+            {% if session['user_id'] %}
+            <a href="/profile" class="block nav-link text-lg py-2">
+                <i class="fas fa-user mr-2"></i>Profile
+            </a>
+            <form action="/logout" method="post" class="block">
+                <button type="submit" class="nav-link text-lg w-full text-left py-2">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+            </form>
+            {% else %}
+            <a href="/login" class="block nav-link text-lg py-2">
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+            </a>
+            <a href="/signup" class="block nav-link text-lg py-2">
+                <i class="fas fa-user-plus mr-2"></i>Signup
+            </a>
+            {% endif %}
+            <!-- Night Mode Toggle for Mobile -->
+            <div class="flex items-center justify-between mt-4">
+                <span>Night Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="nightModeToggleMobile">
+                    <span class="slider"></span>
+                </label>
+                <i class="fas fa-moon ml-2 text-gray-300"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto mt-24 px-4 flex-grow animate__animated animate__fadeIn">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-green-600 to-teal-500 bg-opacity-80 backdrop-filter backdrop-blur-lg text-white p-6">
+        <div class="container mx-auto text-center">
+            <p class="text-lg">&copy; {{ current_year }} MealMate. All rights reserved.</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <a href="#" class="hover:text-green-200 transition duration-300">Privacy Policy</a>
+                <a href="#" class="hover:text-green-200 transition duration-300">Terms of Service</a>
+                <a href="#" class="hover:text-green-200 transition duration-300">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Scripts -->
+    <script>
+        // Mobile Menu Toggle
+        const menuButton = document.getElementById('menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Animate elements on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const navbar = document.getElementById('main-nav');
+        const navbarHeight = navbar.offsetHeight;
+
+        window.addEventListener('scroll', () => {
+            let scrollTop = window
+                .pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > navbarHeight) {
+                // Scrolling down & past the navbar
+                navbar.classList.add('nav-hidden');
+            } else {
+                // Scrolling up
+                navbar.classList.remove('nav-hidden');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+
+        // Night Mode Toggle
+        const nightModeToggle = document.getElementById('nightModeToggle');
+        const nightModeToggleMobile = document.getElementById('nightModeToggleMobile');
+        const body = document.body;
+        const moonIcon = document.querySelector('.fa-moon');
+
+        function toggleNightMode() {
+            body.classList.toggle('night-mode');
+            const isNightMode = body.classList.contains('night-mode');
+            localStorage.setItem('nightMode', isNightMode);
+            moonIcon.classList.toggle('text-yellow-300', isNightMode);
+        }
+
+        nightModeToggle.addEventListener('change', toggleNightMode);
+        nightModeToggleMobile.addEventListener('change', toggleNightMode);
+
+        // Check for saved night mode preference
+        if (localStorage.getItem('nightMode') === 'true') {
+            body.classList.add('night-mode');
+            nightModeToggle.checked = true;
+            nightModeToggleMobile.checked = true;
+            moonIcon.classList.add('text-yellow-300');
+        }
+    </script>
+</body>
+
+</html>
