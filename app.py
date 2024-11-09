@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timedelta
 
 pymysql.install_as_MySQLdb()
-from models import db, User, Recipe  # Import Recipe model
+from models import db, User, Recipe, Admin  # Import Recipe model and Admin model
 
 app = Flask(__name__)
 CORS(app)
@@ -23,49 +23,74 @@ app.config['SECRET_KEY'] = 'your_secret_key_here'
 db.init_app(app)
 migrate = Migrate(app, db)
 
+# Add this at the top of your file, after the imports
+recipes = []  # Define recipes as a global variable
+
 # Function to parse CSV and load recipes into the database
 def parse_and_load_recipes(csv_file_path):
+    recipes = []
     with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
-        recipes = []
         for row in reader:
-            # Map CSV data to Recipe model fields
-            recipe = Recipe(
-                name=row['name'],
-                image=row.get('image', ''),
-                serving_size=int(float(row['serving_size'])) if row['serving_size'] else None,
-                prep_time_in_mins=int(float(row['prep_time_in_mins'])) if row['prep_time_in_mins'] else None,
-                cook_time_in_mins=int(float(row['cook_time_in_mins'])) if row['cook_time_in_mins'] else None,
-                ingredients=row['ingredients'],
-                instructions=row.get('instructions', ''),
-                energy_per_serving_kcal=float(row['energy_per_serving_kcal']) if row['energy_per_serving_kcal'] else None,
-                carbohydrate_g=float(row['carbohydrate_per_serving_g']) if row['carbohydrate_per_serving_g'] else None,
-                protein_g=float(row['protein_per_serving_g']) if row['protein_per_serving_g'] else None,
-                fat_g=float(row['fat_per_serving_g']) if row['fat_per_serving_g'] else None,
-                fiber_g=float(row['fiber_per_serving_g']) if row['fiber_per_serving_g'] else None,
-                is_vegetarian=bool(int(float(row['is_vegetarian']))) if row['is_vegetarian'] else False,
-                is_breakfast=bool(int(float(row['is_breakfast']))) if row['is_breakfast'] else False,
-                is_lunch=bool(int(float(row['is_lunch']))) if row['is_lunch'] else False,
-                is_snack=bool(int(float(row['is_snack']))) if row['is_snack'] else False,
-                is_dinner=bool(int(float(row['is_dinner']))) if row['is_dinner'] else False
-            )
-            recipes.append(recipe)
-    with app.app_context():
-        for recipe in recipes:
-            # Check if the recipe already exists to avoid duplicates
-            existing_recipe = Recipe.query.filter_by(name=recipe.name).first()
-            if not existing_recipe:
-                db.session.add(recipe)
-        db.session.commit()
-    print("Recipes imported successfully!")
+            try:
+                # Safe conversion functions
+                def safe_int(value, default=0):
+                    try:
+                        if value and value != 'Ellipsis':
+                            return int(float(value))
+                        return default
+                    except (ValueError, TypeError):
+                        return default
+
+                def safe_float(value, default=0.0):
+                    try:
+                        if value and value != 'Ellipsis':
+                            return float(value)
+                        return default
+                    except (ValueError, TypeError):
+                        return default
+
+                def safe_bool(value, default=False):
+                    try:
+                        if value and value != 'Ellipsis':
+                            return bool(int(float(value)))
+                        return default
+                    except (ValueError, TypeError):
+                        return default
+
+                # Only include fields that exist in the Recipe model
+                recipe = Recipe(
+                    name=row.get('name', ''),
+                    image=row.get('image', ''),
+                    serving_size=safe_int(row.get('serving_size'), 1),
+                    prep_time_in_mins=safe_int(row.get('prep_time_in_mins'), 0),
+                    cook_time_in_mins=safe_int(row.get('cook_time_in_mins'), 0),
+                    ingredients=row.get('ingredients', ''),
+                    is_vegetarian=safe_bool(row.get('is_vegetarian')),
+                    is_breakfast=safe_bool(row.get('is_breakfast')),
+                    is_lunch=safe_bool(row.get('is_lunch')),
+                    is_dinner=safe_bool(row.get('is_dinner')),
+                    is_snack=safe_bool(row.get('is_snack')),
+                    energy_per_serving_kcal=safe_float(row.get('energy_per_serving_kcal')),
+                    carbohydrate_g=safe_float(row.get('carbohydrate_per_serving_g')),
+                    protein_g=safe_float(row.get('protein_per_serving_g')),
+                    fat_g=safe_float(row.get('fat_per_serving_g')),
+                    fiber_g=safe_float(row.get('fiber_per_serving_g'))
+                )
+                recipes.append(recipe)
+            except Exception as e:
+                print(f"Error loading recipe {row.get('name', 'unknown')}: {str(e)}")
+                continue
+
+    return recipes
 
 # Load recipes when the app starts
 def load_recipes():
-    csv_file_path = 'recipes.csv'  # Update with the correct path to your CSV file
-    if os.path.exists(csv_file_path):
-        parse_and_load_recipes(csv_file_path)
-    else:
-        print(f"CSV file not found at {csv_file_path}. Please check the file path.")
+    csv_file_path = 'recipes.csv'
+    if not os.path.exists(csv_file_path):
+        print(f"Warning: {csv_file_path} not found")
+        return []
+    return parse_and_load_recipes(csv_file_path)
 
 # Add this new function
 def create_app():
@@ -98,18 +123,36 @@ def signup():
             flash('Username or email already exists', 'error')
             return redirect(url_for('signup'))
 
+@app.route('/admin/login', methods=['GET'])
+def admin_login_page():
+    return render_template('login.html', login_type='admin')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET':
-        return render_template('login.html')
-    elif request.method == 'POST':
-        data = request.form
-        user = User.query.filter_by(username=data['username']).first()
-        if user and check_password_hash(user.password_hash, data['password']):
-            session['user_id'] = user.id
-            return redirect(url_for('profile'))
-        flash('Invalid username or password', 'error')
-        return redirect(url_for('login'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        login_type = request.form['login_type']
+
+        if login_type == 'admin':
+            admin = Admin.query.filter_by(
+                username=username,
+                password=password
+            ).first()
+            if admin:
+                session['admin_id'] = admin.id
+                return redirect(url_for('admin_dashboard'))
+            else:
+                flash('Invalid admin credentials', 'error')
+        else:
+            # Existing user login logic
+            user = User.query.filter_by(username=username).first()
+            if user and check_password_hash(user.password_hash, password):
+                session['user_id'] = user.id
+                return redirect(url_for('dashboard'))
+            flash('Invalid credentials', 'error')
+
+    return render_template('login.html', login_type='user')
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -431,6 +474,182 @@ def calculate_diet():
         },
         'nutritional_values': nutritional_values
     })
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if 'admin_id' not in session:
+        return redirect(url_for('login'))
+    
+    recipes = []
+    with open('recipes.csv', 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        recipes = list(reader)
+    
+    return render_template('admin_dashboard.html', recipes=recipes)
+
+@app.route('/admin/recipe', methods=['POST'])
+def add_recipe():
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # Add recipe to CSV
+    data = request.form
+    with open('recipes.csv', 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow([data['name'], data['ingredients'], ...])  # Add all fields
+    
+    return jsonify({'success': True})
+
+@app.route('/admin/recipe/<int:recipe_id>', methods=['PUT', 'DELETE'])
+def manage_recipe(recipe_id):
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if request.method == 'DELETE':
+        # Delete recipe from CSV
+        recipes = []
+        with open('recipes.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            recipes = [r for r in reader if r['id'] != str(recipe_id)]
+        
+        with open('recipes.csv', 'w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=recipes[0].keys())
+            writer.writeheader()
+            writer.writerows(recipes)
+        
+        return jsonify({'success': True})
+    
+    elif request.method == 'PUT':
+        # Update recipe in CSV
+        data = request.form
+        recipes = []
+        with open('recipes.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            recipes = list(reader)
+            for recipe in recipes:
+                if recipe['id'] == str(recipe_id):
+                    recipe.update(data)
+        
+        with open('recipes.csv', 'w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=recipes[0].keys())
+            writer.writeheader()
+            writer.writerows(recipes)
+        
+        return jsonify({'success': True})
+
+@app.route('/admin/recipe/<recipe_name>', methods=['GET'])
+def get_recipe(recipe_name):
+    with open('recipes.csv', 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for recipe in reader:
+            if recipe['name'] == recipe_name:
+                return jsonify(recipe)
+    return jsonify({'error': 'Recipe not found'}), 404
+
+@app.route('/admin/recipe/delete/<recipe_name>', methods=['POST'])
+def delete_recipe(recipe_name):
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        # Read all recipes
+        recipes = []
+        with open('recipes.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            fieldnames = reader.fieldnames
+            recipes = list(reader)
+        
+        # Find and remove the recipe
+        recipes = [r for r in recipes if r['name'].strip() != recipe_name.strip()]
+        
+        # Write back to CSV
+        with open('recipes.csv', 'w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(recipes)
+        
+        return jsonify({'success': True, 'message': 'Recipe deleted successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/recipe/new', methods=['GET', 'POST'])
+def create_recipe():
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if request.method == 'POST':
+        data = request.form
+        with open('recipes.csv', 'a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow([
+                data.get('name', ''),
+                data.get('image', ''),
+                data.get('serving_size', ''),
+                data.get('prep_time_in_mins', ''),
+                data.get('cook_time_in_mins', ''),
+                data.get('ingredients', ''),
+                data.get('ingredients_name', ''),
+                data.get('ingredients_quantity_gram', ''),
+                data.get('is_vegetarian', '0'),
+                data.get('is_breakfast', '0'),
+                data.get('is_lunch', '0'),
+                data.get('is_snack', '0'),
+                data.get('is_dinner', '0'),
+                data.get('energy_per_serving_kcal', '0'),
+                data.get('carbohydrate_per_serving_g', '0'),
+                data.get('protein_per_serving_g', '0'),
+                data.get('fat_per_serving_g', '0'),
+                data.get('fiber_per_serving_g', '0')
+            ])
+        flash('Recipe added successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('add_recipe.html')
+
+@app.route('/admin/recipe/edit/<recipe_name>', methods=['GET', 'POST'])
+def edit_recipe(recipe_name):
+    if 'admin_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'GET':
+        recipe = Recipe.query.filter_by(name=recipe_name).first()
+        if recipe is None:
+            flash('Recipe not found', 'error')
+            return redirect(url_for('admin_dashboard'))
+        return render_template('edit_recipe.html', recipe=recipe)
+    
+    elif request.method == 'POST':
+        recipe = Recipe.query.filter_by(name=recipe_name).first()
+        if recipe is None:
+            flash('Recipe not found', 'error')
+            return redirect(url_for('admin_dashboard'))
+        
+        try:
+            recipe.name = request.form['name']
+            recipe.image = request.form['image']
+            recipe.serving_size = int(request.form['serving_size'])
+            recipe.prep_time_in_mins = int(request.form['prep_time_in_mins'])
+            recipe.cook_time_in_mins = int(request.form['cook_time_in_mins'])
+            recipe.ingredients = request.form['ingredients']
+            recipe.instructions = request.form['instructions']
+            recipe.energy_per_serving_kcal = float(request.form['energy_per_serving_kcal']) if request.form['energy_per_serving_kcal'] else None
+            recipe.carbohydrate_g = float(request.form['carbohydrate_g']) if request.form['carbohydrate_g'] else None
+            recipe.protein_g = float(request.form['protein_g']) if request.form['protein_g'] else None
+            recipe.fat_g = float(request.form['fat_g']) if request.form['fat_g'] else None
+            recipe.fiber_g = float(request.form['fiber_g']) if request.form['fiber_g'] else None
+            recipe.is_vegetarian = bool(request.form.get('is_vegetarian'))
+            recipe.is_breakfast = bool(request.form.get('is_breakfast'))
+            recipe.is_lunch = bool(request.form.get('is_lunch'))
+            recipe.is_snack = bool(request.form.get('is_snack'))
+            recipe.is_dinner = bool(request.form.get('is_dinner'))
+            
+            db.session.commit()
+            flash('Recipe updated successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating recipe: {str(e)}', 'error')
+            return redirect(url_for('edit_recipe', recipe_name=recipe_name))
 
 if __name__ == '__main__':
     create_app()

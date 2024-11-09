@@ -110,3 +110,15 @@ class UserDietaryPreference(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     preference = db.Column(db.String(50), nullable=False)
     __table_args__ = (db.UniqueConstraint('user_id', 'preference'),)
+
+# Add Admin model
+class Admin(db.Model):
+    __tablename__ = 'admins'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Admin {self.username}>'

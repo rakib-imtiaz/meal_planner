@@ -35,3 +35,4 @@ class Recipe(db.Model):
     is_snack = db.Column(db.Boolean)
     is_dinner = db.Column(db.Boolean)
     fiber_g = db.Column(db.Float)
+    instructions = db.Column(db.Text)
