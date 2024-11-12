@@ -97,3 +97,18 @@ CREATE TABLE admins (
 -- Insert default admin (plain password)
 INSERT INTO admins (username, password) VALUES ('admin', 'admin123');
 
+-- User nutrition table
+CREATE TABLE user_nutrition (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    calorie_needs FLOAT,
+    protein_needs FLOAT,
+    carbohydrate_needs FLOAT,
+    fat_needs FLOAT,
+    fiber_needs FLOAT,
+    physical_activity_level VARCHAR(20),
+    weight_goal VARCHAR(20),
+    bmi FLOAT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+

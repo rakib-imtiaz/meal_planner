@@ -2,12 +2,15 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="bg-white shadow-2xl rounded-3xl overflow-hidden transform hover:scale-105 transition-all duration-300 ease-in-out">
+    <div
+        class="bg-white shadow-2xl rounded-3xl overflow-hidden transform hover:scale-105 transition-all duration-300 ease-in-out">
         <div class="md:flex">
             <!-- Sidebar -->
-            <div class="md:w-1/3 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 p-8 relative overflow-hidden">
+            <div
+                class="md:w-1/3 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 p-8 relative overflow-hidden">
                 <div class="absolute inset-0 bg-white opacity-10 animate-pulse"></div>
-                <h2 class="text-4xl font-extrabold mb-8 text-white text-center relative z-10 animate-float">Diet Planner</h2>
+                <h2 class="text-4xl font-extrabold mb-8 text-white text-center relative z-10 animate-float">Diet Planner
+                </h2>
                 <div class="space-y-6 relative z-10">
                     <div class="flex items-center space-x-4 text-white animate-slideIn">
                         <i class="fas fa-user-circle text-3xl"></i>
@@ -37,7 +40,8 @@
                         <!-- Height -->
                         <div class="relative transform hover:scale-105 transition-all duration-300">
                             <label for="height" class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
-                            <input type="number" id="height" name="height" value="{{ user.height or '' }}" step="0.1" required
+                            <input type="number" id="height" name="height" value="{{ user.height or '' }}" step="0.1"
+                                required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent shadow-sm">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <i class="fas fa-ruler-vertical text-cyan-400"></i>
@@ -46,7 +50,8 @@
                         <!-- Weight -->
                         <div class="relative transform hover:scale-105 transition-all duration-300">
                             <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
-                            <input type="number" id="weight" name="weight" value="{{ user.weight or '' }}" step="0.1" required
+                            <input type="number" id="weight" name="weight" value="{{ user.weight or '' }}" step="0.1"
+                                required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent shadow-sm">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <i class="fas fa-weight text-cyan-400"></i>
@@ -57,13 +62,13 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                             <div class="flex items-center space-x-6">
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="gender" value="Male" {% if user.sex=='Male' %}checked{% endif %}
-                                        class="form-radio h-5 w-5 text-cyan-600">
+                                    <input type="radio" name="gender" value="Male" {% if user.sex=='Male' %}checked{%
+                                        endif %} class="form-radio h-5 w-5 text-cyan-600">
                                     <span class="ml-2 text-gray-700">Male</span>
                                 </label>
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="gender" value="Female" {% if user.sex=='Female' %}checked{% endif %}
-                                        class="form-radio h-5 w-5 text-cyan-600">
+                                    <input type="radio" name="gender" value="Female" {% if user.sex=='Female'
+                                        %}checked{% endif %} class="form-radio h-5 w-5 text-cyan-600">
                                     <span class="ml-2 text-gray-700">Female</span>
                                 </label>
                             </div>
@@ -71,10 +76,12 @@
                     </div>
                     <!-- Activity Level -->
                     <div class="transform hover:scale-105 transition-all duration-300">
-                        <label for="activity_level" class="block text-sm font-medium text-gray-700 mb-1">Activity Level</label>
+                        <label for="activity_level" class="block text-sm font-medium text-gray-700 mb-1">Activity
+                            Level</label>
                         <div class="relative">
                             <input type="range" id="activity_level" name="activity_level" min="1" max="5"
-                                value="{{ user.activity_level or '3' }}" class="w-full appearance-none h-2 bg-cyan-200 rounded-full outline-none opacity-70 transition-opacity duration-200 ease-in-out hover:opacity-100">
+                                value="{{ user.activity_level or '3' }}"
+                                class="w-full appearance-none h-2 bg-cyan-200 rounded-full outline-none opacity-70 transition-opacity duration-200 ease-in-out hover:opacity-100">
                             <div class="flex justify-between text-xs text-gray-600 mt-1">
                                 <span>Sedentary</span>
                                 <span>Lightly Active</span>
@@ -87,27 +94,36 @@
                     <!-- Goal -->
                     <div class="transform hover:scale-105 transition-all duration-300">
                         <label for="goal" class="block text-sm font-medium text-gray-700 mb-1">Weight Goal</label>
-                        <select id="goal" name="goal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent shadow-sm">
-                            <option value="Maintain weight" {% if user.goal == 'Maintain weight' %}selected{% endif %}>Maintain weight</option>
-                            <option value="Weight loss" {% if user.goal == 'Weight loss' %}selected{% endif %}>Weight loss</option>
-                            <option value="Extreme weight loss" {% if user.goal == 'Extreme weight loss' %}selected{% endif %}>Extreme weight loss</option>
-                            <option value="Weight gain" {% if user.goal == 'Weight gain' %}selected{% endif %}>Weight gain</option>
+                        <select id="goal" name="goal"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent shadow-sm">
+                            <option value="Maintain weight" {% if user.goal=='Maintain weight' %}selected{% endif %}>
+                                Maintain weight</option>
+                            <option value="Weight loss" {% if user.goal=='Weight loss' %}selected{% endif %}>Weight loss
+                            </option>
+                            <option value="Extreme weight loss" {% if user.goal=='Extreme weight loss' %}selected{%
+                                endif %}>Extreme weight loss</option>
+                            <option value="Weight gain" {% if user.goal=='Weight gain' %}selected{% endif %}>Weight gain
+                            </option>
                         </select>
                     </div>
                     <!-- Meals Per Day -->
                     <div class="transform hover:scale-105 transition-all duration-300">
-                        <label for="meals_per_day" class="block text-sm font-medium text-gray-700 mb-1">Meals Per Day</label>
+                        <label for="meals_per_day" class="block text-sm font-medium text-gray-700 mb-1">Meals Per
+                            Day</label>
                         <input type="number" id="meals_per_day" name="meals_per_day" min="3" max="6"
                             value="{{ user.meals_per_day or '3' }}" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent shadow-sm">
                     </div>
                     <!-- Dietary Preference -->
                     <div class="transform hover:scale-105 transition-all duration-300">
-                        <label for="dietary_preference" class="block text-sm font-medium text-gray-700 mb-1">Dietary Preference</label>
+                        <label for="dietary_preference" class="block text-sm font-medium text-gray-700 mb-1">Dietary
+                            Preference</label>
                         <select id="dietary_preference" name="dietary_preference"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent shadow-sm">
-                            <option value="non-vegetarian" {% if user.dietary_preference == 'non-vegetarian' %}selected{% endif %}>Non-Vegetarian</option>
-                            <option value="vegetarian" {% if user.dietary_preference == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                            <option value="non-vegetarian" {% if user.dietary_preference=='non-vegetarian' %}selected{%
+                                endif %}>Non-Vegetarian</option>
+                            <option value="vegetarian" {% if user.dietary_preference=='vegetarian' %}selected{% endif
+                                %}>Vegetarian</option>
                         </select>
                     </div>
                     <!-- Submit Button -->
@@ -120,97 +136,113 @@
         </div>
     </div>
 
-    {% if diet_data %}
-    <!-- Diet Plan Section -->
-    <div class="mt-12 bg-white shadow-2xl rounded-3xl overflow-hidden animate-fadeIn">
-        <div class="bg-gradient-to-r from-cyan-400 to-blue-500 p-8">
-            <h2 class="text-3xl font-bold text-white text-center animate-pulse">Your Personalized Diet Plan</h2>
-        </div>
-        <div class="p-8 bg-gradient-to-br from-gray-50 to-gray-100">
-            <!-- BMI Section -->
-            <div class="mb-8 p-6 bg-gradient-to-r from-green-100 to-green-50 rounded-lg shadow-inner transform hover:scale-105 transition-all duration-300">
-                <h3 class="text-2xl font-semibold mb-4 text-green-800">BMI</h3>
-                <p class="text-xl">Your BMI is <span class="font-bold">{{ diet_data.bmi.value }}</span>, which is considered <span class="font-bold text-green-600">{{ diet_data.bmi.category }}</span>.</p>
-            </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div
+        class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
-            <!-- Calorie Intake Section -->
-            <div class="mb-8 p-6 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg shadow-inner transform hover:scale-105 transition-all duration-300">
-                <h3 class="text-2xl font-semibold mb-4 text-blue-800">Calorie Intake</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for plan, calories in diet_data.calories.items() %}
-                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
-                        <p class="font-medium text-lg text-gray-700">{{ plan }}</p>
-                        <p class="text-2xl font-bold text-blue-600 mt-2">{{ calories }} kcal</p>
-                    </div>
-                    {% endfor %}
+    {% if diet_data %}
+    <!-- Health Metrics Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Health Metrics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- BMI Card -->
+                <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">BMI</h3>
+                    <p class="text-3xl font-bold text-cyan-600">{{ "%.1f"|format(diet_data.bmi.value) }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Category: {{ diet_data.bmi.category }}</p>
+                </div>
+                
+                <!-- Weight Goal Card -->
+                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Recommended Goal</h3>
+                    <p class="text-xl font-bold text-emerald-600">{{ user.goal }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Based on your health metrics</p>
+                </div>
+                
+                <!-- Daily Calories Card -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Daily Calories</h3>
+                    <p class="text-3xl font-bold text-purple-600">{{ diet_data.calorie_comparison.total }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Maintenance: {{ diet_data.calorie_comparison.maintenance }}</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Meal Recommendations Section -->
-            <div class="mb-8">
-                <h3 class="text-2xl font-semibold mb-6 text-purple-800">Meal Recommendations</h3>
-                {% for meal_time, meals in diet_data.meals.items() %}
-                <div class="mb-8">
-                    <h4 class="text-xl font-bold mb-4 capitalize text-purple-600">{{ meal_time }}</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {% for meal in meals %}
-                        {% if meal.name != 'No suitable meal found' %}
-                        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
-                            <h5 class="text-lg font-semibold mb-2 text-gray-800">{{ meal.name }}</h5>
-                            {% if meal.image %}
-                            <img src="{{ meal.image }}" alt="{{ meal.name }}" class="w-full h-48 object-cover rounded mb-4">
-                            {% endif %}
-                            <div class="text-gray-700 space-y-2">
-                                <p><strong>Serving Size:</strong> {{ meal.serving_size }}</p>
-                                <p><strong>Preparation Time:</strong> {{ meal.prep_time_in_mins }} minutes</p>
-                                <p><strong>Cooking Time:</strong> {{ meal.cook_time_in_mins }} minutes</p>
-                                <p><strong>Calories:</strong> {{ meal.energy_per_serving_kcal }} kcal</p>
-                                <p><strong>Protein:</strong> {{ meal.protein_per_serving_g }} g</p>
-                                <p><strong>Carbohydrates:</strong> {{ meal.carbohydrate_per_serving_g }} g</p>
-                                <p><strong>Fat:</strong> {{ meal.fat_per_serving_g }} g</p>
-                                <p><strong>Fiber:</strong> {{ meal.fiber_per_serving_g }} g</p>
+        <!-- Meal Recommendations Section -->
+        {% if diet_data and diet_data.meal_plan %}
+            {% for meal_type, meals in diet_data.meal_plan.items() %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 capitalize">{{ meal_type }} - {{ diet_data.calories[meal_type] }} kcal</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for meal in meals %}
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                        {% if meal.image %}
+                        <img src="{{ meal.image }}" alt="{{ meal.name }}" class="w-full h-48 object-cover">
+                        {% endif %}
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ meal.name }}</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Calories:</span>
+                                    <span class="font-medium">{{ meal.energy_per_serving_kcal }} kcal</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <span class="block text-gray-500">Protein</span>
+                                        <span class="font-medium">{{ meal.protein_per_serving_g }}g</span>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <span class="block text-gray-500">Carbs</span>
+                                        <span class="font-medium">{{ meal.carbohydrate_per_serving_g }}g</span>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <span class="block text-gray-500">Fat</span>
+                                        <span class="font-medium">{{ meal.fat_per_serving_g }}g</span>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <span class="block text-gray-500">Fiber</span>
+                                        <span class="font-medium">{{ meal.fiber_per_serving_g }}g</span>
+                                    </div>
+                                </div>
                                 {% if meal.ingredients %}
-                                <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-gray-700 mb-1">Ingredients:</h4>
+                                    <p class="text-sm text-gray-600">{{ meal.ingredients }}</p>
+                                </div>
                                 {% endif %}
                                 {% if meal.instructions %}
-                                <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-gray-700 mb-1">Instructions:</h4>
+                                    <p class="text-sm text-gray-600">{{ meal.instructions }}</p>
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
-                        {% else %}
-                        <p class="text-red-600">No suitable meal found for {{ meal_time }}.</p>
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Calorie Comparison Section -->
-            <div class="mb-8 p-6 bg-gradient-to-r from-yellow-100 to-yellow-50 rounded-lg shadow-inner transform hover:scale-105 transition-all duration-300">
-                <h3 class="text-2xl font-semibold mb-4 text-yellow-800">Calorie Comparison</h3>
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="mb-4 md:mb-0">
-                        <p class="text-xl">Total Calorie Intake: <span class="font-bold text-yellow-600">{{ diet_data.calorie_comparison.total }} kcal</span></p>
-                        <p class="text-xl">Maintenance Calories: <span class="font-bold text-yellow-600">{{ diet_data.calorie_comparison.maintenance }} kcal</span></p>
-                    </div>
-                    <!-- You can add a small chart or infographic here if desired -->
-                </div>
-            </div>
-
-            <!-- Nutritional Values Section -->
-            <div class="mb-8">
-                <h3 class="text-2xl font-semibold mb-4 text-pink-800">Nutritional Values</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {% for nutrient, value in diet_data.nutritional_values.items() %}
-                    <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
-                        <p class="font-medium text-lg text-gray-700">{{ nutrient }}</p>
-                        <p class="text-2xl font-bold text-pink-600 mt-2">{{ value }} g</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
-        </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-center py-8">
+                    <p class="text-gray-500">No meal recommendations available. Please update your profile information.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <!-- Show this when no diet data is available -->
+    <div class="mt-8 p-6 bg-gray-50 rounded-lg text-center">
+        <p class="text-lg text-gray-600">Submit your information above to generate your personalized meal plan.</p>
     </div>
     {% endif %}
 </div>
@@ -232,33 +264,111 @@
 <style>
     /* Animations */
     @keyframes fade-in {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animate-fadeIn {
         animation: fade-in 0.5s ease-out;
     }
+
     @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
     }
+
     .animate-float {
         animation: float 3s ease-in-out infinite;
     }
+
     @keyframes slideIn {
-        from { opacity: 0; transform: translateX(-20px); }
-        to { opacity: 1; transform: translateX(0); }
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
+
     .animate-slideIn {
         animation: slideIn 0.5s ease-out forwards;
     }
+
     /* Loader Animation */
     @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+            transform: rotate(360deg);
+        }
     }
+
     .loader {
         border-top-color: #4CAF50;
         animation: spin 1s linear infinite;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all tab buttons and content sections
+    const tabButtons = document.querySelectorAll('.meal-tab');
+    const mealContents = document.querySelectorAll('.meal-content');
+
+    // Function to show selected meal content and update tab styles
+    function showMealContent(mealType) {
+        // Hide all meal contents
+        mealContents.forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Remove active styles from all tabs
+        tabButtons.forEach(button => {
+            button.classList.remove('border-cyan-500', 'text-cyan-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+
+        // Show selected meal content
+        const selectedContent = document.getElementById(`${mealType}-content`);
+        if (selectedContent) {
+            selectedContent.classList.remove('hidden');
+        }
+
+        // Update selected tab style
+        const selectedTab = document.querySelector(`[data-meal="${mealType}"]`);
+        if (selectedTab) {
+            selectedTab.classList.remove('border-transparent', 'text-gray-500');
+            selectedTab.classList.add('border-cyan-500', 'text-cyan-600');
+        }
+    }
+
+    // Add click event listeners to all tab buttons
+    tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const mealType = button.getAttribute('data-meal');
+            showMealContent(mealType);
+        });
+    });
+
+    // Show breakfast tab by default
+    showMealContent('breakfast');
+});
+</script>

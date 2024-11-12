@@ -82,7 +82,8 @@ class UserRating(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
-    updated_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    updated_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp
+    (), onupdate=db.func.current_timestamp())
     __table_args__ = (db.UniqueConstraint('user_id', 'recipe_id'),
                       db.CheckConstraint('rating >= 1 AND rating <= 5'))
 
