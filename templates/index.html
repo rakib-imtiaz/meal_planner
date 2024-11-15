@@ -1,136 +1,252 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnnoMitro - Your Personal Meal Recommendation Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <script>
+        // Add Tailwind Dark Mode Configuration
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--bg-primary)',
+                        secondary: 'var(--bg-secondary)',
+                        'text-primary': 'var(--text-primary)',
+                        'text-secondary': 'var(--text-secondary)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hero section gradients */
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--header-bg-from), var(--header-bg-to));
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
 
-{% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-teal-500 relative overflow-hidden">
-    <!-- Background Animation with Floating Emojis -->
-    <div class="absolute inset-0 z-0 backdrop-filter backdrop-blur-sm">
-        <canvas id="backgroundCanvas" class="w-full h-full"></canvas>
-    </div>
+        .dark .feature-card {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    <!-- Main Content -->
-    <div class="text-center p-12 bg-gray-800 bg-opacity-80 backdrop-filter backdrop-blur-md rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out relative z-10 max-w-2xl w-full">
-        <!-- Icon -->
-        <div class="flex justify-center mb-8">
-            <span class="text-green-400 text-7xl animate__animated animate__bounceIn">
-                🍽️
-            </span>
-        </div>
-        <h1 class="text-5xl font-extrabold mb-6 text-white animate__animated animate__fadeInDown">
-            Welcome to <span class="text-green-400">MealMate</span>
-        </h1>
-        <p class="text-xl mb-10 text-gray-300 animate__animated animate__fadeInUp animate__delay-1s">
-            Your personal meal recommendation assistant
-        </p>
-        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <a href="/login" class="inline-block bg-green-500 text-white font-bold py-3 px-10 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out animate__animated animate__bounceIn animate__delay-2s">
-                <i class="fas fa-sign-in-alt mr-2"></i> Login
-            </a>
-            <a href="/signup" class="inline-block bg-teal-500 text-white font-bold py-3 px-10 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out animate__animated animate__bounceIn animate__delay-2s">
-                <i class="fas fa-user-plus mr-2"></i> Sign Up
-            </a>
-            <a href="/login?type=admin" class="inline-block bg-purple-500 text-white font-bold py-3 px-10 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out animate__animated animate__bounceIn animate__delay-2s">
-                <i class="fas fa-user-shield mr-2"></i> Admin Login
-            </a>
-        </div>
-    </div>
-</div>
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
 
-<!-- Include Font Awesome for Icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        .dark .feature-card:hover {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
 
-<!-- Three.js for Background Animation -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-    // Background Animation with Floating Emojis
-    const canvas = document.getElementById('backgroundCanvas');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
-    camera.position.set(0, 0, 100);
+        /* Food icon cards */
+        .food-icon-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+        .dark .food-icon-card {
+            background: rgba(255, 255, 255, 0.05);
+        }
 
-    // Array of meal-related emojis
-    const mealEmojis = [
-        '🍔', '🍕', '🍎', '🍌', '🍰', '🍣', '🍩', '🍪', '🍇', '🍉',
-        '🍓', '🥑', '🌽', '🥕', '🌮', '🍗', '🍖', '🍤', '🍿', '🍹'
-    ];
+        /* Animation classes */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
 
-    // Create floating emoji particles
-    const particles = [];
-    const particleCount = 50;
+        @keyframes floating {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
 
-    for (let i = 0; i < particleCount; i++) {
-        const size = Math.random() * 2 + 7; // Random size between 10 and 20
-        const geometry = new THREE.PlaneGeometry(size, size);
-        const mealEmoji = mealEmojis[Math.floor(Math.random() * mealEmojis.length)];
-        const canvasTexture = createEmojiTexture(mealEmoji, size);
-        const material = new THREE.MeshBasicMaterial({
-            map: canvasTexture,
-            transparent: true
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+
+        /* Dark mode specific styles */
+        .dark .hero-text {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .glass-effect {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* CTA section gradients */
+        .cta-gradient {
+            background: linear-gradient(135deg, var(--header-bg-from), var(--header-bg-to));
+        }
+
+        .dark .cta-gradient {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+    </style>
+</head>
+<body class="bg-primary text-text-primary transition-colors duration-200">
+    {% include 'header.html' %}
+
+    <main>
+        <!-- Hero Section -->
+        <section class="relative min-h-screen flex items-center">
+            <!-- Background with Gradient -->
+            <div class="absolute inset-0 hero-gradient"></div>
+            
+            <!-- Content -->
+            <div class="container mx-auto px-4 relative z-10">
+                <div class="flex flex-col lg:flex-row items-center justify-between">
+                    <!-- Left Side: Text Content -->
+                    <div class="lg:w-1/2 text-white mb-12 lg:mb-0">
+                        <h1 class="text-5xl lg:text-6xl font-bold mb-6 animate__animated animate__fadeInDown">
+                            Discover Your Perfect Meal with <span class="text-green-300">OnnoMitro</span>
+                        </h1>
+                        <p class="text-xl mb-8 animate__animated animate__fadeInUp animate__delay-1s">
+                            Your AI-powered personal chef that understands your preferences, dietary needs, and helps you make the best meal choices.
+                        </p>
+                        <div class="flex flex-wrap gap-4 animate__animated animate__fadeInUp animate__delay-2s">
+                            <a href="/login" class="bg-white text-green-600 px-8 py-3 rounded-full font-semibold hover:bg-green-50 transition-colors flex items-center shadow-lg hover:shadow-xl">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Get Started
+                            </a>
+                            <a href="#features" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i> Learn More
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Feature Image with Food Icons -->
+                    <div class="lg:w-1/2 flex justify-center">
+                        <div class="relative w-full max-w-lg">
+                            <!-- Animated Blobs -->
+                            <div class="absolute top-0 -left-4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+                            <div class="absolute top-0 -right-4 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+                            <div class="absolute -bottom-8 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+                            
+                            <!-- Food Icons Grid -->
+                            <div class="relative grid grid-cols-3 gap-4 p-4">
+                                <!-- Food Icons with Hover Effects -->
+                                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl hover:transform hover:scale-105 transition-all duration-300 floating">
+                                    <i class="fas fa-utensils text-4xl text-white"></i>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl hover:transform hover:scale-105 transition-all duration-300 floating animation-delay-200">
+                                    <i class="fas fa-carrot text-4xl text-white"></i>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl hover:transform hover:scale-105 transition-all duration-300 floating animation-delay-400">
+                                    <i class="fas fa-apple-alt text-4xl text-white"></i>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl hover:transform hover:scale-105 transition-all duration-300 floating animation-delay-300">
+                                    <i class="fas fa-hamburger text-4xl text-white"></i>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl hover:transform hover:scale-105 transition-all duration-300 floating animation-delay-500">
+                                    <i class="fas fa-pizza-slice text-4xl text-white"></i>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl hover:transform hover:scale-105 transition-all duration-300 floating animation-delay-600">
+                                    <i class="fas fa-ice-cream text-4xl text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 bg-secondary">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-12 text-text-primary">
+                    Why Choose OnnoMitro?
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="feature-card p-6 rounded-2xl">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-brain text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">AI-Powered Recommendations</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Smart meal suggestions based on your preferences and dietary requirements.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card p-6 rounded-2xl">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-utensils text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Personalized Meal Plans</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Custom meal plans tailored to your goals and lifestyle.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card p-6 rounded-2xl">
+                        <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-chart-line text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Nutrition Tracking</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Monitor your nutritional intake and progress towards your goals.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action Section -->
+        <section class="py-20 cta-gradient">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-white mb-8">Ready to Start Your Journey?</h2>
+                <p class="text-xl text-white/90 mb-12 max-w-2xl mx-auto">
+                    Join thousands of users who have transformed their eating habits with OnnoMitro.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="/signup" class="bg-white text-green-600 px-8 py-3 rounded-full font-semibold hover:bg-green-50 transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i> Sign Up Now
+                    </a>
+                    <a href="/login" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <script>
+        // Initialize dark mode based on system preference or saved setting
+        if (localStorage.getItem('darkMode') === 'dark' || 
+            (!localStorage.getItem('darkMode') && 
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Listen for system color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('darkMode')) {
+                if (e.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
         });
-        const particle = new THREE.Mesh(geometry, material);
-
-        // Random position within the visible area
-        particle.position.set(
-            (Math.random() - 0.5) * window.innerWidth * 0.1,
-            (Math.random() - 0.5) * window.innerHeight * 0.1,
-            0
-        );
-
-        // Random speed
-        particle.userData.velocity = new THREE.Vector3(
-            (Math.random() - 0.5) * 0.1,
-            (Math.random() - 0.2) * 0.1,
-            0
-        );
-
-        scene.add(particle);
-        particles.push(particle);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-
-        particles.forEach(particle => {
-            particle.position.add(particle.userData.velocity);
-
-            // Wrap around logic based on window size
-            if (particle.position.x > window.innerWidth / 10) particle.position.x = -window.innerWidth / 10;
-            if (particle.position.x < -window.innerWidth / 10) particle.position.x = window.innerWidth / 10;
-            if (particle.position.y > window.innerHeight / 10) particle.position.y = -window.innerHeight / 10;
-            if (particle.position.y < -window.innerHeight / 10) particle.position.y = window.innerHeight / 10;
-        });
-
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    // Function to create a texture from an emoji
-    function createEmojiTexture(emoji, size) {
-        const canvasSize = 128;
-        const canvas = document.createElement('canvas');
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-
-        const ctx = canvas.getContext('2d');
-        ctx.font = `${canvasSize * 0.8}px sans-serif`;
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(emoji, canvasSize / 2, canvasSize / 2);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        return texture;
-    }
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>

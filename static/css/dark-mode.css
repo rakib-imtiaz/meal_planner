@@ -1,0 +1,78 @@
+/* Light mode */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f3f4f6;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --border-color: #e5e7eb;
+    --card-bg: #ffffff;
+    --header-bg-from: rgba(34, 197, 94, 0.4);
+    --header-bg-to: rgba(13, 148, 136, 0.4);
+}
+
+/* Dark mode */
+:root[class~="dark"] {
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --border-color: #374151;
+    --card-bg: #1f2937;
+    --header-bg-from: rgba(34, 197, 94, 0.2);
+    --header-bg-to: rgba(13, 148, 136, 0.2);
+}
+
+/* Base styles */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Card styles */
+.glass-effect {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.dark .glass-effect {
+    background: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Add these new styles for the gradient background */
+.gradient-overlay {
+    background: linear-gradient(
+        135deg,
+        var(--header-bg-from),
+        var(--header-bg-to)
+    );
+}
+
+/* Update input field styles for better dark mode visibility */
+input {
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.dark input {
+    background-color: rgba(31, 41, 55, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.dark input:focus {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+/* Table styles */
+.dark table {
+    --tw-bg-opacity: 0.05;
+    background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+}
+
+.dark tbody tr:hover {
+    --tw-bg-opacity: 0.1;
+    background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+} 

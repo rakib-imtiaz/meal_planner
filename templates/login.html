@@ -1,178 +1,285 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MealMate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--bg-primary)',
+                        secondary: 'var(--bg-secondary)',
+                        'text-primary': 'var(--text-primary)',
+                        'text-secondary': 'var(--text-secondary)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary">
+    {% include 'header.html' %}
 
-{% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-teal-500 relative overflow-hidden">
-    <!-- Background Animation with Floating Emojis -->
-    <div class="absolute inset-0 z-0">
-        <canvas id="backgroundCanvas" class="w-full h-full"></canvas>
-    </div>
+    <main>
+        {% if session.get('logged_in') %}
+            <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-teal-500">
+                <div class="glass-effect p-8 rounded-3xl shadow-2xl">
+                    <h2 class="text-2xl font-bold text-center text-text-primary mb-4">You are already logged in!</h2>
+                    <div class="flex justify-center">
+                        <a href="{{ url_for('index') }}" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                            Go to Homepage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+        <div class="min-h-screen flex items-center justify-center relative overflow-hidden bg-primary">
+            <div class="absolute inset-0 bg-gradient-to-br from-green-400/80 to-teal-500/80 dark:from-green-600/30 dark:to-teal-700/30"></div>
 
-    <!-- Login Card -->
-    <div class="max-w-md w-full bg-white bg-opacity-80 backdrop-filter backdrop-blur-md p-8 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out relative z-10 animate__animated animate__fadeIn">
-        <h2 class="text-4xl font-extrabold mb-6 text-center text-gray-800 animate__animated animate__fadeInDown">
-            <i class="fas fa-user-circle text-green-600"></i> Welcome Back
-        </h2>
-        <form action="{{ url_for('login') }}" method="post" class="space-y-6">
-            <!-- Username Field -->
-            <div class="relative group">
-                <input type="text" id="username" name="username" required class="w-full px-4 py-3 bg-white bg-opacity-50 border-2 border-transparent rounded-lg focus:border-green-500 focus:outline-none transition-all duration-300 peer placeholder-transparent">
-                <label for="username" class="absolute left-4 top-3 text-gray-600 transition-all duration-300 transform peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-green-600">Username</label>
+            <!-- Background Animation with Floating Emojis -->
+            <div class="absolute inset-0 z-0">
+                <canvas id="backgroundCanvas" class="w-full h-full"></canvas>
             </div>
-            <!-- Password Field -->
-            <div class="relative group">
-                <input type="password" id="password" name="password" required class="w-full px-4 py-3 bg-white bg-opacity-50 border-2 border-transparent rounded-lg focus:border-green-500 focus:outline-none transition-all duration-300 peer placeholder-transparent">
-                <label for="password" class="absolute left-4 top-3 text-gray-600 transition-all duration-300 transform peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-green-600">Password</label>
+
+            <!-- Login Card -->
+            <div class="max-w-md w-full glass-effect p-8 rounded-3xl shadow-2xl relative z-10">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="inline-block p-3 bg-green-500/20 rounded-full mb-4">
+                        <i class="fas fa-user-circle text-3xl text-green-500"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-text-primary mb-2">Welcome Back</h2>
+                    <p class="text-text-secondary">Sign in to your account</p>
+                </div>
+
+                <!-- Login Form -->
+                <form action="{{ url_for('login') }}" method="post" class="space-y-6">
+                    <!-- Username Input -->
+                    <div class="space-y-2">
+                        <label for="username" class="block text-text-secondary text-sm">
+                            Username
+                        </label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="username" 
+                                   name="username" 
+                                   class="w-full bg-secondary border border-border-color rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-green-500"
+                                   required>
+                            <i class="fas fa-user absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary"></i>
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="space-y-2">
+                        <label for="password" class="block text-text-secondary text-sm">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   class="w-full bg-secondary border border-border-color rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-green-500"
+                                   required>
+                            <i class="fas fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary"></i>
+                        </div>
+                    </div>
+
+                    <!-- Login Type -->
+                    <div class="flex justify-center space-x-6">
+                        <label class="inline-flex items-center">
+                            <input type="radio" 
+                                   name="login_type" 
+                                   value="user" 
+                                   checked 
+                                   class="form-radio text-green-500 focus:ring-green-500">
+                            <span class="ml-2 text-text-secondary">User</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" 
+                                   name="login_type" 
+                                   value="admin" 
+                                   class="form-radio text-purple-500 focus:ring-purple-500">
+                            <span class="ml-2 text-text-secondary">Admin</span>
+                        </label>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" 
+                            class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </button>
+                </form>
+
+                <!-- Sign Up Link -->
+                <p class="text-center text-text-secondary mt-6">
+                    Don't have an account? 
+                    <a href="{{ url_for('signup') }}" class="text-green-500 hover:text-green-400">
+                        Sign Up
+                    </a>
+                </p>
             </div>
-            <!-- Login Type -->
-            <div class="flex justify-center space-x-4">
-                <label class="inline-flex items-center">
-                    <input type="radio" name="login_type" value="user" checked class="form-radio text-green-500">
-                    <span class="ml-2">User</span>
-                </label>
-                <label class="inline-flex items-center">
-                    <input type="radio" name="login_type" value="admin" class="form-radio text-purple-500">
-                    <span class="ml-2">Admin</span>
-                </label>
-            </div>
-            <!-- Login Button -->
-            <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg hover:from-green-600 hover:to-teal-600 transform hover:-translate-y-1 transition-all duration-300 shadow-lg animate__animated animate__pulse animate__infinite">
-                <i class="fas fa-sign-in-alt mr-2"></i> Login
-            </button>
-        </form>
-        <!-- Additional Links -->
-        <div class="mt-6 text-center">
-            <p class="text-gray-700">Don't have an account? <a href="{{ url_for('signup') }}" class="text-green-600 font-bold hover:underline">Sign Up</a></p>
         </div>
-    </div>
-</div>
+        {% endif %}
+    </main>
 
-<!-- Include Font Awesome for Icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    {% include 'footer.html' %}
 
-<!-- Three.js for Background Animation -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-    // Background Animation with Floating Emojis
-    const canvas = document.getElementById('backgroundCanvas');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
-    camera.position.set(0, 0, 100);
+    <!-- Include Font Awesome for Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    <!-- Three.js for Background Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Background Animation with Floating Emojis
+        const canvas = document.getElementById('backgroundCanvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+        camera.position.set(0, 0, 100);
 
-    // Array of meal-related emojis
-    const mealEmojis = [
-        '🍔', '🍕', '🍎', '🍌', '🍰', '🍣', '🍩', '🍪', '🍇', '🍉',
-        '🍓', '🥑', '🌽', '🥕', '🌮', '🍗', '🍖', '🍤', '🍿', '🍹'
-    ];
-
-    // Create floating emoji particles
-    const particles = [];
-    const particleCount = 50;
-
-    for (let i = 0; i < particleCount; i++) {
-        const size = Math.random() * 4 + 9; // Random size between 20 and 30
-        const geometry = new THREE.PlaneGeometry(size, size);
-        const mealEmoji = mealEmojis[Math.floor(Math.random() * mealEmojis.length)];
-        const canvasTexture = createEmojiTexture(mealEmoji);
-        const material = new THREE.MeshBasicMaterial({
-            map: canvasTexture,
-            transparent: true
-        });
-        const particle = new THREE.Mesh(geometry, material);
-
-        // Random position within the visible area
-        particle.position.set(
-            (Math.random() - 0.5) * window.innerWidth * 0.2,
-            (Math.random() - 0.5) * window.innerHeight * 0.2,
-            0
-        );
-
-        // Random speed
-        particle.userData.velocity = new THREE.Vector3(
-            (Math.random() - 0.5) * 0.05,
-            (Math.random() - 0.2) * 0.05,
-            0
-        );
-
-        scene.add(particle);
-        particles.push(particle);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-
-        particles.forEach(particle => {
-            particle.position.add(particle.userData.velocity);
-
-            // Wrap around logic based on window size
-            if (particle.position.x > window.innerWidth / 10) particle.position.x = -window.innerWidth / 10;
-            if (particle.position.x < -window.innerWidth / 10) particle.position.x = window.innerWidth / 10;
-            if (particle.position.y > window.innerHeight / 10) particle.position.y = -window.innerHeight / 10;
-            if (particle.position.y < -window.innerHeight / 10) particle.position.y = window.innerHeight / 10;
-        });
-
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    // Function to create a texture from an emoji
-    function createEmojiTexture(emoji) {
-        const canvasSize = 128;
-        const canvas = document.createElement('canvas');
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-
-        const ctx = canvas.getContext('2d');
-        ctx.font = `${canvasSize * 0.8}px sans-serif`;
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(emoji, canvasSize / 2, canvasSize / 2);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        return texture;
-    }
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-</script>
+        renderer.setPixelRatio(window.devicePixelRatio);
 
-<!-- Anime.js for Element Animations -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        anime.timeline()
-            .add({
-                targets: '.animate__fadeIn',
-                opacity: [0, 1],
-                easing: 'easeOutQuad',
-                duration: 800
-            })
-            .add({
-                targets: 'input, button',
-                translateY: [50, 0],
-                opacity: [0, 1],
-                delay: anime.stagger(100),
-                easing: 'easeOutExpo'
-            }, '-=600');
+        // Array of meal-related emojis
+        const mealEmojis = [
+            '🍔', '🍕', '🍎', '🍌', '🍰', '🍣', '🍩', '🍪', '🍇', '🍉',
+            '🍓', '🥑', '🌽', '🥕', '🌮', '🍗', '🍖', '🍤', '🍿', '🍹'
+        ];
+
+        // Create floating emoji particles
+        const particles = [];
+        const particleCount = 50;
+
+        for (let i = 0; i < particleCount; i++) {
+            const size = Math.random() * 4 + 9; // Random size between 20 and 30
+            const geometry = new THREE.PlaneGeometry(size, size);
+            const mealEmoji = mealEmojis[Math.floor(Math.random() * mealEmojis.length)];
+            const canvasTexture = createEmojiTexture(mealEmoji);
+            const material = new THREE.MeshBasicMaterial({
+                map: canvasTexture,
+                transparent: true
+            });
+            const particle = new THREE.Mesh(geometry, material);
+
+            // Random position within the visible area
+            particle.position.set(
+                (Math.random() - 0.5) * window.innerWidth * 0.2,
+                (Math.random() - 0.5) * window.innerHeight * 0.2,
+                0
+            );
+
+            // Random speed
+            particle.userData.velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 0.05,
+                (Math.random() - 0.2) * 0.05,
+                0
+            );
+
+            scene.add(particle);
+            particles.push(particle);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            particles.forEach(particle => {
+                particle.position.add(particle.userData.velocity);
+
+                // Wrap around logic based on window size
+                if (particle.position.x > window.innerWidth / 10) particle.position.x = -window.innerWidth / 10;
+                if (particle.position.x < -window.innerWidth / 10) particle.position.x = window.innerWidth / 10;
+                if (particle.position.y > window.innerHeight / 10) particle.position.y = -window.innerHeight / 10;
+                if (particle.position.y < -window.innerHeight / 10) particle.position.y = window.innerHeight / 10;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Function to create a texture from an emoji
+        function createEmojiTexture(emoji) {
+            const canvasSize = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+
+            const ctx = canvas.getContext('2d');
+            ctx.font = `${canvasSize * 0.8}px sans-serif`;
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, canvasSize / 2, canvasSize / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+
+    <!-- Anime.js for Element Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            anime.timeline()
+                .add({
+                    targets: '.animate__fadeIn',
+                    opacity: [0, 1],
+                    easing: 'easeOutQuad',
+                    duration: 800
+                })
+                .add({
+                    targets: 'input, button',
+                    translateY: [50, 0],
+                    opacity: [0, 1],
+                    delay: anime.stagger(100),
+                    easing: 'easeOutExpo'
+                }, '-=600');
+        });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if admin login is requested via URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        if (type === 'admin') {
+            document.querySelector('input[value="admin"]').checked = true;
+        }
     });
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if admin login is requested via URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const type = urlParams.get('type');
-    if (type === 'admin') {
-        document.querySelector('input[value="admin"]').checked = true;
-    }
-});
-</script>
-{% endblock %}
+    </script>
+
+    <script>
+        // Initialize dark mode based on system preference or saved setting
+        if (localStorage.getItem('darkMode') === 'dark' || 
+            (!localStorage.getItem('darkMode') && 
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Listen for system color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('darkMode')) {
+                if (e.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

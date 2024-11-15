@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Onno Mitro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    {% include 'header.html' %}
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-white mb-8 shadow-lg">
+            <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user.name }}!</h1>
+            <p class="text-lg opacity-90">Let's plan your healthy meals for today.</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-weight text-blue-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Current Weight</p>
+                        <p class="text-xl font-bold">{{ user.weight }} kg</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-fire text-green-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Daily Calories</p>
+                        <p class="text-xl font-bold">{{ daily_calories }} kcal</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-bullseye text-purple-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Goal</p>
+                        <p class="text-xl font-bold capitalize">{{ user.goal }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-running text-orange-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Activity Level</p>
+                        <p class="text-xl font-bold capitalize">{{ user.activity_level }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meal Plan Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Today's Meal Plan -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4">Today's Meal Plan</h2>
+                <div class="space-y-4">
+                    {% for meal_type in ['breakfast', 'lunch', 'dinner', 'snack'] %}
+                    <div class="border-b pb-4 last:border-b-0">
+                        <h3 class="text-lg font-semibold capitalize mb-2">{{ meal_type }}</h3>
+                        {% if meal_recommendations[meal_type] %}
+                        <div class="flex items-center space-x-4">
+                            <img src="{{ meal_recommendations[meal_type].image }}" 
+                                 alt="{{ meal_recommendations[meal_type].name }}"
+                                 class="w-16 h-16 rounded-lg object-cover">
+                            <div>
+                                <p class="font-medium">{{ meal_recommendations[meal_type].name }}</p>
+                                <p class="text-sm text-gray-500">{{ meal_recommendations[meal_type].calories }} kcal</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-gray-500">No recommendation yet</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <a href="{{ url_for('generate_meal_plan') }}"
+                       class="block w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors text-center">
+                        Generate New Meal Plan
+                    </a>
+                </div>
+            </div>
+
+            <!-- Nutrition Overview -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4">Nutrition Overview</h2>
+                <div class="space-y-4">
+                    <div class="relative pt-1">
+                        <p class="text-sm font-medium">Proteins</p>
+                        <div class="flex items-center justify-between">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-500 h-2.5 rounded-full" style="width:{{ nutrition.protein_percentage }}%"></div>
+                            </div>
+                            <span class="ml-4 text-sm">{{ nutrition.protein }}g</span>
+                        </div>
+                    </div>
+                    <div class="relative pt-1">
+                        <p class="text-sm font-medium">Carbs</p>
+                        <div class="flex items-center justify-between">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-green-500 h-2.5 rounded-full" style="width:{{ nutrition.carbs_percentage }}%"></div>
+                            </div>
+                            <span class="ml-4 text-sm">{{ nutrition.carbs }}g</span>
+                        </div>
+                    </div>
+                    <div class="relative pt-1">
+                        <p class="text-sm font-medium">Fats</p>
+                        <div class="flex items-center justify-between">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-yellow-500 h-2.5 rounded-full" style="width:{{ nutrition.fats_percentage }}%"></div>
+                            </div>
+                            <span class="ml-4 text-sm">{{ nutrition.fats }}g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{{ url_for('edit_profile') }}" 
+               class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <i class="fas fa-user-edit text-2xl text-green-500 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2">Update Profile</h3>
+                <p class="text-gray-600">Keep your information up to date for better recommendations.</p>
+            </a>
+            <a href="{{ url_for('add_recipe') }}" 
+               class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <i class="fas fa-utensils text-2xl text-green-500 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2">Browse Recipes</h3>
+                <p class="text-gray-600">Explore our collection of healthy and delicious recipes.</p>
+            </a>
+            <a href="#" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <i class="fas fa-chart-line text-2xl text-green-500 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2">Track Progress</h3>
+                <p class="text-gray-600">Monitor your journey towards your health goals.</p>
+            </a>
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <script>
+        // Add any JavaScript functionality here
+    </script>
+</body>
+</html>

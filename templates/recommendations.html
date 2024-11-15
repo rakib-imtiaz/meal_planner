@@ -1,28 +1,259 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+</head>
+<body class="bg-gray-50">
+    {% include 'header.html' %}
 
-{% block content %}
-<h2 class="text-3xl font-bold mb-8 text-center animate__animated animate__fadeInDown">Recommended Recipes</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for recipe in recipes %}
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300 ease-in-out animate__animated animate__fadeInUp night-mode:bg-gray-800">
-        <div class="relative">
-            <img src="{{ recipe.image }}" alt="{{ recipe.name }}" class="w-full h-56 object-cover">
-            <div class="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-lg">
-                {{ recipe.energy_per_serving_kcal }} kcal
+    <main>
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- BMI and Nutritional Summary -->
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- BMI Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 animate__animated animate__fadeInLeft">
+                    <h3 class="text-2xl font-bold mb-4">BMI Status</h3>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-4xl font-bold text-green-600">{{ "%.3f"|format(diet_data.bmi.value) }}</p>
+                            <p class="text-gray-600">Category: {{ diet_data.bmi.category }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold">Daily Calories</p>
+                            <p class="text-2xl text-green-600" id="totalCalories">{{ diet_data.calories.total }} kcal</p>
+                            <p class="text-lg text-orange-500" id="remainingCalories">Remaining: {{ diet_data.calories.total }} kcal</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutritional Values Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 animate__animated animate__fadeInRight">
+                    <h3 class="text-2xl font-bold mb-4">Daily Nutritional Targets</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        {% for nutrient, value in diet_data.nutritional_values.items() %}
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-gray-600">{{ nutrient }}</p>
+                            <p class="text-2xl font-bold text-green-600">{{ value }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Meals Summary -->
+            <div class="mb-8 bg-white rounded-xl shadow-lg p-6 animate__animated animate__fadeInUp">
+                <h3 class="text-2xl font-bold mb-4">Selected Meals</h3>
+                <div id="selectedMeals" class="space-y-2">
+                    <!-- Selected meals will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Meal Plans -->
+            <div class="space-y-8">
+                {% for meal_type, recipes in diet_data.meals.items() %}
+                <div class="animate__animated animate__fadeInUp">
+                    <h2 class="text-2xl font-bold mb-4 capitalize">{{ meal_type }} ({{ diet_data.calories[meal_type] }} kcal)</h2>
+                    {% if recipes %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for recipe in recipes %}
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
+                            {% if recipe.image %}
+                            <img src="{{ recipe.image }}" alt="{{ recipe.name }}" class="w-full h-48 object-cover">
+                            {% else %}
+                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-400">No image available</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-3">{{ recipe.name }}</h3>
+                                
+                                <!-- Nutritional Info -->
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Calories:</span>
+                                        <span class="font-semibold">{{ recipe.energy_per_serving_kcal }} kcal</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Protein:</span>
+                                        <span class="font-semibold">{{ recipe.protein_per_serving_g }}g</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Carbs:</span>
+                                        <span class="font-semibold">{{ recipe.carbohydrate_per_serving_g }}g</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Fat:</span>
+                                        <span class="font-semibold">{{ recipe.fat_per_serving_g }}g</span>
+                                    </div>
+                                </div>
+
+                                <!-- Add Select Button -->
+                                <button onclick="selectMeal('{{ recipe.name }}', {{ recipe.energy_per_serving_kcal }})"
+                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
+                                    Select Meal
+                                </button>
+
+                                <!-- Ingredients Collapse -->
+                                <div class="mb-4">
+                                    <button onclick="toggleIngredients('ingredients-{{ loop.index }}')" 
+                                            class="text-green-600 hover:text-green-700 text-sm font-semibold">
+                                        Show Ingredients ▼
+                                    </button>
+                                    <div id="ingredients-{{ loop.index }}" class="hidden mt-2 text-sm text-gray-600">
+                                        {{ recipe.ingredients }}
+                                    </div>
+                                </div>
+
+                                <div class="text-sm text-gray-600 mb-4">
+                                    <span class="font-semibold">Serving Size:</span> {{ recipe.serving_size }} portions
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-600 italic">No recipes available for {{ meal_type }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
         </div>
-        <div class="p-6">
-            <h3 class="text-xl font-semibold mb-3 truncate night-mode:text-white">{{ recipe.name }}</h3>
-            <div class="flex justify-between text-sm text-gray-600 mb-4 night-mode:text-gray-300">
-                <span>Protein: {{ recipe.protein_g }}g</span>
-                <span>Carbs: {{ recipe.carbohydrate_g }}g</span>
-                <span>Fat: {{ recipe.fat_g }}g</span>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <!-- JavaScript for functionality -->
+    <script>
+    let selectedMeals = [];
+    const totalDailyCalories = {{ diet_data.calories.total }};
+    let remainingCalories = totalDailyCalories;
+
+    function updateCalorieDisplay() {
+        document.getElementById('remainingCalories').textContent = `Remaining: ${Math.round(remainingCalories)} kcal`;
+        
+        // Update color based on remaining calories
+        const remainingElement = document.getElementById('remainingCalories');
+        if (remainingCalories < 0) {
+            remainingElement.classList.remove('text-orange-500');
+            remainingElement.classList.add('text-red-500');
+        } else {
+            remainingElement.classList.remove('text-red-500');
+            remainingElement.classList.add('text-orange-500');
+        }
+    }
+
+    function selectMeal(name, calories) {
+        // Add meal to selected meals
+        selectedMeals.push({ name, calories });
+        
+        // Update remaining calories
+        remainingCalories = totalDailyCalories - selectedMeals.reduce((sum, meal) => sum + meal.calories, 0);
+        
+        // Update the display
+        updateCalorieDisplay();
+        updateSelectedMealsDisplay();
+    }
+
+    function removeMeal(index) {
+        // Add calories back to remaining
+        remainingCalories += selectedMeals[index].calories;
+        
+        // Remove meal from array
+        selectedMeals.splice(index, 1);
+        
+        // Update displays
+        updateCalorieDisplay();
+        updateSelectedMealsDisplay();
+    }
+
+    function updateSelectedMealsDisplay() {
+        const container = document.getElementById('selectedMeals');
+        container.innerHTML = selectedMeals.map((meal, index) => `
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                <span>${meal.name} (${meal.calories} kcal)</span>
+                <button onclick="removeMeal(${index})" 
+                        class="text-red-500 hover:text-red-700">
+                    Remove
+                </button>
             </div>
-            <a href="/recipe/{{ recipe.id }}" class="block w-full text-center bg-gradient-to-r from-green-500 to-teal-400 text-white font-bold py-2 px-4 rounded-lg hover:from-green-600 hover:to-teal-500 transition duration-300 transform hover:-translate-y-1">
-                View Recipe
-            </a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-{% endblock %}
+        `).join('');
+    }
+
+    function toggleIngredients(id) {
+        const element = document.getElementById(id);
+        if (element.classList.contains('hidden')) {
+            element.classList.remove('hidden');
+        } else {
+            element.classList.add('hidden');
+        }
+    }
+    </script>
+
+    <style>
+    .animate__animated {
+        animation-duration: 1s;
+    }
+
+    .animate__fadeInLeft {
+        animation-name: fadeInLeft;
+    }
+
+    .animate__fadeInRight {
+        animation-name: fadeInRight;
+    }
+
+    .animate__fadeInUp {
+        animation-name: fadeInUp;
+    }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translate3d(-100%, 0, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translate3d(100%, 0, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 100%, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+</body>
+</html>

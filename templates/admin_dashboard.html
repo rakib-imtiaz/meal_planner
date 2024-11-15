@@ -1,202 +1,323 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Recipe Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <script>
+        // Add this to ensure Tailwind's dark mode works
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
     <style>
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .hover-scale {
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
         }
         
         .hover-scale:hover {
-            transform: scale(1.02);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.9);
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen">
-    <div class="min-h-screen">
-        <!-- Navigation -->
-        <nav class="glass-effect shadow-lg sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
-                        <div class="flex-shrink-0 flex items-center">
-                            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-                                Admin Dashboard
-                            </h1>
-                        </div>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    {% include 'header.html' %}
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Recipe Management Dashboard</h1>
+            <p class="text-gray-600 dark:text-gray-400">Manage your recipes and track statistics</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+            <!-- Total Recipes Card -->
+            <div class="stat-card rounded-2xl p-6 hover-scale">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg gradient-bg">
+                        <i class="fas fa-utensils text-white text-2xl"></i>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <form action="{{ url_for('logout') }}" method="post">
-                            <button type="submit" class="bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                            </button>
-                        </form>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Total Recipes</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">{{ recipes|length }}</h3>
                     </div>
                 </div>
             </div>
-        </nav>
 
-        <!-- Main Content -->
-        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 fade-in">
-            <!-- Search Bar -->
-            <div class="mb-6">
-                <div class="relative">
-                    <input type="text" 
-                           id="recipeSearch" 
-                           placeholder="Search recipes..." 
-                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent glass-effect"
-                           onkeyup="filterRecipes()">
-                    <span class="absolute right-3 top-2 text-gray-400">
-                        <i class="fas fa-search"></i>
-                    </span>
+            <!-- Vegetarian Recipes -->
+            <div class="stat-card rounded-2xl p-6 hover-scale">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg bg-green-500">
+                        <i class="fas fa-leaf text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Vegetarian</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                            {{ recipes|selectattr('is_vegetarian')|list|length }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Categories -->
+            <div class="stat-card rounded-2xl p-6 hover-scale">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg bg-purple-500">
+                        <i class="fas fa-tags text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Categories</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">4</h3>
+                    </div>
                 </div>
             </div>
 
             <!-- Add Recipe Button -->
-            <div class="mb-6">
-                <a href="{{ url_for('create_recipe') }}" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center transition duration-300 hover-scale">
-                    <i class="fas fa-plus mr-2"></i>
-                    Add New Recipe
+            <div class="stat-card rounded-2xl p-6 hover-scale">
+                <a href="{{ url_for('add_recipe') }}" class="flex items-center justify-center h-full">
+                    <button class="flex items-center space-x-3 text-green-500 hover:text-green-600">
+                        <i class="fas fa-plus-circle text-2xl"></i>
+                        <span class="font-medium text-lg">Add New Recipe</span>
+                    </button>
                 </a>
             </div>
+        </div>
 
-            <!-- Recipe List -->
-            <div class="glass-effect shadow-xl rounded-xl overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                        <tr>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serving Size</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prep Time</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cook Time</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="recipeTableBody">
-                        {% for recipe in recipes %}
-                        <tr class="hover:bg-gray-50 transition duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <img src="{{ recipe.image if recipe.image else '/static/images/default-recipe.jpg' }}" 
-                                     alt="{{ recipe.name }}"
-                                     class="h-16 w-16 object-cover rounded-lg"
-                                     onerror="this.src='/static/images/default-recipe.jpg'">
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ recipe.name }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ recipe.serving_size }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ recipe.prep_time_in_mins }} mins</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ recipe.cook_time_in_mins }} mins</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-3">
-                                    <a href="{{ url_for('edit_recipe', recipe_name=recipe.name) }}" 
-                                       class="text-blue-600 hover:text-blue-900 transition duration-150">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <button onclick="deleteRecipe('{{ recipe.name }}')" 
-                                            class="text-red-600 hover:text-red-900 transition duration-150">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Search Bar -->
+        <div class="glass-card rounded-2xl p-6 mb-8">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" 
+                       id="recipeSearch" 
+                       placeholder="Search recipes..." 
+                       class="w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300">
             </div>
         </div>
-    </div>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="fixed bottom-4 right-4">
-                {% for category, message in messages %}
-                    <div class="glass-effect border-l-4 border-{{ 'green' if category == 'success' else 'red' }}-500 text-{{ 'green' if category == 'success' else 'red' }}-700 p-4 rounded-lg shadow-lg mb-2 fade-in" role="alert">
-                        <span class="block sm:inline">{{ message }}</span>
-                        <button class="absolute top-0 right-0 px-4 py-3" onclick="this.parentElement.remove()">
-                            <i class="fas fa-times"></i>
+        <!-- Recipe Table (Desktop) -->
+        <div class="hidden md:block glass-card rounded-2xl overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50/50 dark:bg-gray-800/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Image</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Recipe Name</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Category</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Total Time</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for recipe in recipes %}
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors duration-200" 
+                        data-recipe-name="{{ recipe.name }}">
+                        <td class="px-6 py-4">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image }}" 
+                                     alt="{{ recipe.name }}"
+                                     class="w-16 h-16 rounded-xl object-cover"
+                                     onerror="this.outerHTML='<div class=\'w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center\'><i class=\'fas fa-utensils text-2xl text-gray-400\'></i></div>'">
+                            {% else %}
+                                <div class="w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <i class="fas fa-utensils text-2xl text-gray-400"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ recipe.name }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium
+                                       {% if recipe.is_breakfast %}bg-blue-100 text-blue-800
+                                       {% elif recipe.is_lunch %}bg-green-100 text-green-800
+                                       {% elif recipe.is_dinner %}bg-purple-100 text-purple-800
+                                       {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if recipe.is_breakfast %}Breakfast
+                                {% elif recipe.is_lunch %}Lunch
+                                {% elif recipe.is_dinner %}Dinner
+                                {% else %}Snack{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-gray-500 dark:text-gray-400">
+                                <i class="far fa-clock mr-1"></i>
+                                {{ recipe.prep_time_in_mins + recipe.cook_time_in_mins }}min
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('edit_recipe', recipe_name=recipe.name) }}" 
+                                   class="p-2 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button onclick="deleteRecipe('{{ recipe.name }}')"
+                                        class="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recipe Cards (Mobile) -->
+        <div class="md:hidden grid grid-cols-1 gap-4">
+            {% for recipe in recipes %}
+            <div class="glass-card rounded-2xl p-4 hover-scale" data-recipe-name="{{ recipe.name }}">
+                <div class="flex justify-between items-start">
+                    <div class="flex space-x-4">
+                        {% if recipe.image %}
+                            <img src="{{ recipe.image }}" 
+                                 alt="{{ recipe.name }}"
+                                 class="w-20 h-20 rounded-lg object-cover"
+                                 onerror="this.outerHTML='<div class=\'w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center\'><i class=\'fas fa-utensils text-3xl text-gray-400\'></i></div>'">
+                        {% else %}
+                            <div class="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <i class="fas fa-utensils text-3xl text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h3 class="font-medium">{{ recipe.name }}</h3>
+                            <p class="text-sm text-secondary">
+                                <i class="far fa-clock mr-1"></i>
+                                {{ recipe.prep_time_in_mins + recipe.cook_time_in_mins }}min
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('edit_recipe', recipe_name=recipe.name) }}" 
+                           class="p-2 rounded-lg text-blue-400 hover:bg-blue-400/10">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="deleteRecipe('{{ recipe.name }}')"
+                                class="p-2 rounded-lg text-red-400 hover:bg-red-400/10">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
-                {% endfor %}
+                </div>
             </div>
-        {% endif %}
-    {% endwith %}
+            {% endfor %}
+        </div>
+    </main>
 
+    {% include 'footer.html' %}
+
+    <!-- Initialize dark mode -->
     <script>
-    function filterRecipes() {
-        const searchInput = document.getElementById('recipeSearch');
-        const filter = searchInput.value.toLowerCase();
-        const tbody = document.getElementById('recipeTableBody');
-        const rows = tbody.getElementsByTagName('tr');
+        // Search functionality
+        document.getElementById('recipeSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const mobileRecipeCards = document.querySelectorAll('.md\\:hidden .glass-effect');
+            const desktopRecipeRows = document.querySelectorAll('.hidden.md\\:block tbody tr');
 
-        for (let row of rows) {
-            const nameCell = row.getElementsByTagName('td')[1]; // Updated index since we added image column
-            const name = nameCell.textContent || nameCell.innerText;
-            if (name.toLowerCase().indexOf(filter) > -1) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        }
-    }
-
-    async function deleteRecipe(recipeName) {
-        if (!confirm('Are you sure you want to delete this recipe?')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`/admin/recipe/delete/${encodeURIComponent(recipeName)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                credentials: 'same-origin'
+            // Search in mobile view
+            mobileRecipeCards.forEach(card => {
+                const recipeName = card.querySelector('h3').textContent.toLowerCase();
+                if (recipeName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
             });
 
-            const data = await response.json();
-            
-            if (response.ok) {
-                // Show success message
-                alert('Recipe deleted successfully');
-                // Reload the page to show updated list
-                window.location.reload();
-            } else {
-                // Show error message
-                alert(data.error || 'Error deleting recipe');
+            // Search in desktop view
+            desktopRecipeRows.forEach(row => {
+                const recipeName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (recipeName.includes(searchTerm)) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Delete recipe function
+        function deleteRecipe(recipeName) {
+            if (confirm(`Are you sure you want to delete "${recipeName}"?`)) {
+                fetch(`/admin/recipe/${encodeURIComponent(recipeName)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Remove the recipe elements from both mobile and desktop views
+                        document.querySelectorAll(`[data-recipe-name="${recipeName}"]`).forEach(el => {
+                            el.remove();
+                        });
+                        
+                        // Update the recipe count
+                        const recipeCount = document.querySelector('.text-xl.font-bold');
+                        if (recipeCount) {
+                            recipeCount.textContent = parseInt(recipeCount.textContent) - 1;
+                        }
+                        
+                        // Show success message
+                        alert('Recipe deleted successfully!');
+                    } else {
+                        alert('Error deleting recipe: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting recipe: ' + error.message);
+                });
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error deleting recipe');
         }
-    }
+
+        // Initialize dark mode
+        if (localStorage.getItem('darkMode') === 'dark' || 
+            (!localStorage.getItem('darkMode') && 
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
     </script>
 </body>
+</html>
 </html>

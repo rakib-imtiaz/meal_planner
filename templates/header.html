@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Add Tailwind Dark Mode Configuration
+        tailwind.config = {
+            darkMode: 'class', // This is important!
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    <style>
+        /* Light mode colors */
+        :root {
+            --header-bg-from: #22c55e;
+            --header-bg-to: #0d9488;
+        }
+
+        /* Dark mode colors */
+        :root[class~="dark"] {
+            --header-bg-from: #1e293b;
+            --header-bg-to: #0f172a;
+        }
+
+        header {
+            background-image: linear-gradient(to right, var(--header-bg-from), var(--header-bg-to));
+        }
+
+        .nav-link {
+            @apply px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+        }
+
+        /* Light mode styles */
+        .light .nav-link {
+            @apply hover:bg-green-500 hover:text-white;
+        }
+
+        .light .mobile-nav-link {
+            @apply text-gray-100 hover:bg-green-500;
+        }
+
+        /* Dark mode styles */
+        .dark .nav-link {
+            @apply hover:bg-gray-700 text-gray-100;
+        }
+
+        .dark .mobile-nav-link {
+            @apply text-gray-100 hover:bg-gray-700;
+        }
+
+        .dark body {
+            @apply bg-gray-900 text-gray-100;
+        }
+
+        /* Mobile menu animation */
+        #mobile-menu {
+            transition: all 0.3s ease-in-out;
+            transform-origin: top;
+        }
+
+        #mobile-menu.hidden {
+            display: none;
+            transform: scaleY(0);
+            opacity: 0;
+        }
+
+        #mobile-menu:not(.hidden) {
+            display: block;
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        /* Mobile menu backdrop */
+        .backdrop-blur-lg {
+            backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+<body>
+    <header class="shadow-lg">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{{ url_for('index') }}" class="text-2xl font-bold text-white">
+                        Onno Mitro
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <!-- Dark Mode Toggle Button -->
+                    <button id="darkModeToggle" 
+                            class="p-2 rounded-full hover:bg-opacity-20 hover:bg-gray-700 text-white transition-colors">
+                        <i class="fas fa-moon text-xl dark:hidden"></i>
+                        <i class="fas fa-sun text-xl hidden dark:block"></i>
+                    </button>
+
+                    {% if session.get('logged_in') %}
+                        {% if session.get('is_admin') %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                                <i class="fas fa-chart-line mr-2"></i>Dashboard
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="nav-link">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                                <i class="fas fa-home mr-2"></i>Dashboard
+                            </a>
+                            <a href="{{ url_for('edit_profile') }}" class="nav-link">
+                                <i class="fas fa-user-edit mr-2"></i>Edit Profile
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="nav-link">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                            <span class="text-sm ml-4 text-white">
+                                <i class="fas fa-user-circle mr-2"></i>Welcome, {{ session.get('username') }}!
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="nav-link">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                        <a href="{{ url_for('signup') }}" class="nav-link">
+                            <i class="fas fa-user-plus mr-2"></i>Sign Up
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white p-2 rounded-md hover:bg-opacity-20 hover:bg-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-4 py-2 space-y-3 bg-white/10 backdrop-blur-lg rounded-b-2xl shadow-lg">
+                    <!-- User Info Section (if logged in) -->
+                    {% if session.get('logged_in') %}
+                    <div class="border-b border-gray-200/20 pb-3 mb-3">
+                        <div class="flex items-center space-x-3 px-2 py-2">
+                            <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <i class="fas fa-user-circle text-xl text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium">{{ session.get('username') }}</p>
+                                <p class="text-gray-300 text-sm">
+                                    {% if session.get('is_admin') %}Administrator{% else %}Member{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Navigation Links -->
+                    <nav class="space-y-2">
+                        <!-- Dark Mode Toggle -->
+                        <button id="darkModeToggleMobile" 
+                                class="w-full flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                            <div class="w-8 flex justify-center">
+                                <i class="fas fa-moon text-lg dark:hidden"></i>
+                                <i class="fas fa-sun text-lg hidden dark:block"></i>
+                            </div>
+                            <span class="ml-3 dark:hidden">Dark Mode</span>
+                            <span class="ml-3 hidden dark:block">Light Mode</span>
+                        </button>
+
+                        {% if session.get('logged_in') %}
+                            {% if session.get('is_admin') %}
+                                <a href="{{ url_for('admin_dashboard') }}" 
+                                   class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                    <div class="w-8 flex justify-center">
+                                        <i class="fas fa-chart-line text-lg"></i>
+                                    </div>
+                                    <span class="ml-3">Dashboard</span>
+                                </a>
+                                <a href="{{ url_for('logout') }}" 
+                                   class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                    <div class="w-8 flex justify-center">
+                                        <i class="fas fa-sign-out-alt text-lg"></i>
+                                    </div>
+                                    <span class="ml-3">Logout</span>
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('dashboard') }}" 
+                                   class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                    <div class="w-8 flex justify-center">
+                                        <i class="fas fa-home text-lg"></i>
+                                    </div>
+                                    <span class="ml-3">Dashboard</span>
+                                </a>
+                                <a href="{{ url_for('edit_profile') }}" 
+                                   class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                    <div class="w-8 flex justify-center">
+                                        <i class="fas fa-user-edit text-lg"></i>
+                                    </div>
+                                    <span class="ml-3">Edit Profile</span>
+                                </a>
+                                <a href="{{ url_for('logout') }}" 
+                                   class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                    <div class="w-8 flex justify-center">
+                                        <i class="fas fa-sign-out-alt text-lg"></i>
+                                    </div>
+                                    <span class="ml-3">Logout</span>
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('login') }}" 
+                               class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                <div class="w-8 flex justify-center">
+                                    <i class="fas fa-sign-in-alt text-lg"></i>
+                                </div>
+                                <span class="ml-3">Login</span>
+                            </a>
+                            <a href="{{ url_for('signup') }}" 
+                               class="flex items-center p-3 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                <div class="w-8 flex justify-center">
+                                    <i class="fas fa-user-plus text-lg"></i>
+                                </div>
+                                <span class="ml-3">Sign Up</span>
+                            </a>
+                        {% endif %}
+                    </nav>
+
+                    <!-- Bottom Section with Additional Info -->
+                    <div class="pt-4 mt-4 border-t border-gray-200/20">
+                        <div class="flex items-center justify-center space-x-4">
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const darkModeToggleMobile = document.getElementById('darkModeToggleMobile');
+
+            // Toggle mobile menu with animation
+            mobileMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Function to toggle dark mode
+            function toggleDarkMode() {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('darkMode', 
+                    document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+                );
+            }
+
+            // Add click handlers for both desktop and mobile dark mode toggles
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+            darkModeToggleMobile.addEventListener('click', toggleDarkMode);
+
+            // Initialize dark mode based on saved preference or system preference
+            if (localStorage.getItem('darkMode') === 'dark' || 
+                (!localStorage.getItem('darkMode') && 
+                 window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
