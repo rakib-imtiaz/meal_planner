@@ -44,8 +44,7 @@ class Recipe(db.Model):
     prep_time_in_mins = db.Column(db.Integer, default=0)
     cook_time_in_mins = db.Column(db.Integer, default=0)
     ingredients = db.Column(db.Text, default='')
-    ingredients_name = db.Column(db.Text, default='')
-    ingredients_quantity_gram = db.Column(db.Text, default='')
+    instructions = db.Column(db.Text, default='')  # New field
     is_vegetarian = db.Column(db.Boolean, default=False)
     is_breakfast = db.Column(db.Boolean, default=False)
     is_lunch = db.Column(db.Boolean, default=False)
@@ -56,7 +55,6 @@ class Recipe(db.Model):
     protein_per_serving_g = db.Column(db.Float, default=0.0)
     fat_per_serving_g = db.Column(db.Float, default=0.0)
     fiber_per_serving_g = db.Column(db.Float, default=0.0)
-    instructions = db.Column(db.Text, default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

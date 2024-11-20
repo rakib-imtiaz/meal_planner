@@ -71,8 +71,7 @@ def parse_and_load_recipes(csv_file_path):
             'prep_time_in_mins': 0,
             'cook_time_in_mins': 0,
             'ingredients': '',
-            'ingredients_name': '',  # Empty string instead of NaN
-            'ingredients_quantity_gram': '',
+            'instructions': '',  # New field
             'is_vegetarian': False,
             'is_breakfast': False,
             'is_lunch': False,
@@ -82,20 +81,18 @@ def parse_and_load_recipes(csv_file_path):
             'carbohydrate_per_serving_g': 0.0,
             'protein_per_serving_g': 0.0,
             'fat_per_serving_g': 0.0,
-            'fiber_per_serving_g': 0.0,
-            'instructions': ''
+            'fiber_per_serving_g': 0.0
         })
         
         for _, row in df.iterrows():
             recipe = Recipe(
                 name=str(row['name']),
                 image=str(row.get('image', '')),
-                serving_size=int(row.get('serving_size', 1)),
-                prep_time_in_mins=int(row.get('prep_time_in_mins', 0)),
-                cook_time_in_mins=int(row.get('cook_time_in_mins', 0)),
+                serving_size=int(float(row.get('serving_size', 1))),
+                prep_time_in_mins=int(float(row.get('prep_time_in_mins', 0))),
+                cook_time_in_mins=int(float(row.get('cook_time_in_mins', 0))),
                 ingredients=str(row.get('ingredients', '')),
-                ingredients_name=str(row.get('ingredients_name', '')),
-                ingredients_quantity_gram=str(row.get('ingredients_quantity_gram', '')),
+                instructions=str(row.get('instructions', '')),  # New field
                 is_vegetarian=bool(row.get('is_vegetarian', False)),
                 is_breakfast=bool(row.get('is_breakfast', False)),
                 is_lunch=bool(row.get('is_lunch', False)),
@@ -105,8 +102,7 @@ def parse_and_load_recipes(csv_file_path):
                 carbohydrate_per_serving_g=float(row.get('carbohydrate_per_serving_g', 0)),
                 protein_per_serving_g=float(row.get('protein_per_serving_g', 0)),
                 fat_per_serving_g=float(row.get('fat_per_serving_g', 0)),
-                fiber_per_serving_g=float(row.get('fiber_per_serving_g', 0)),
-                instructions=str(row.get('instructions', ''))
+                fiber_per_serving_g=float(row.get('fiber_per_serving_g', 0))
             )
             recipes.append(recipe)
         
@@ -128,7 +124,7 @@ def parse_and_load_recipes(csv_file_path):
 
 # Load recipes when the app starts
 def load_recipes():
-    csv_file_path = 'recipes.csv'
+    csv_file_path = 'recipes_final.csv'
     if not os.path.exists(csv_file_path):
         print(f"Warning: {csv_file_path} not found")
         return []
@@ -487,8 +483,11 @@ def edit_recipe(recipe_name):
             flash(f'Error updating recipe: {str(e)}', 'error')
             return redirect(url_for('edit_recipe', recipe_name=recipe_name))
 
-@app.route('/generate_meal_plan', methods=['POST'])
+@app.route('/generate_meal_plan', methods=['GET', 'POST'])
 def generate_meal_plan():
+    if request.method == 'GET':
+        return render_template('meal_plan_form.html')
+        
     try:
         # Create a temporary user object from form data
         class TempUser:
@@ -650,7 +649,7 @@ if __name__ == '__main__':
         db.create_all()
         
         # Load recipes from CSV
-        csv_path = os.path.join(os.path.dirname(__file__), 'recipes.csv')
+        csv_path = os.path.join(os.path.dirname(__file__), 'recipes_final.csv')
         print(f"Looking for recipes.csv at: {csv_path}")
         
         if parse_and_load_recipes(csv_path):

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Meal Plan - Onno Mitro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+{% include 'header.html' %}
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Generate Meal Plan</h2>
+        
+        <form method="POST" action="{{ url_for('generate_meal_plan') }}" class="space-y-6">
+            <!-- Age Input -->
+            <div>
+                <label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Age</label>
+                <input type="number" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                       id="age" 
+                       name="age" 
+                       required>
+            </div>
+            
+            <!-- Height Input -->
+            <div>
+                <label for="height" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Height (cm)</label>
+                <input type="number" 
+                       step="0.01" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                       id="height" 
+                       name="height" 
+                       required>
+            </div>
+            
+            <!-- Weight Input -->
+            <div>
+                <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Weight (kg)</label>
+                <input type="number" 
+                       step="0.01" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                       id="weight" 
+                       name="weight" 
+                       required>
+            </div>
+            
+            <!-- Gender Select -->
+            <div>
+                <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
+                <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                        id="gender" 
+                        name="gender" 
+                        required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            
+            <!-- Activity Level Select -->
+            <div>
+                <label for="activity_level" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Activity Level</label>
+                <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                        id="activity_level" 
+                        name="activity_level" 
+                        required>
+                    <option value="1">Sedentary</option>
+                    <option value="2">Lightly Active</option>
+                    <option value="3">Moderately Active</option>
+                    <option value="4">Very Active</option>
+                    <option value="5">Extra Active</option>
+                </select>
+            </div>
+            
+            <!-- Goal Select -->
+            <div>
+                <label for="goal" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Goal</label>
+                <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                        id="goal" 
+                        name="goal" 
+                        required>
+                    <option value="Maintain weight">Maintain Weight</option>
+                    <option value="Lose weight">Lose Weight</option>
+                    <option value="Gain weight">Gain Weight</option>
+                </select>
+            </div>
+            
+            <!-- Dietary Preference Select -->
+            <div>
+                <label for="dietary_preference" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dietary Preference</label>
+                <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                        id="dietary_preference" 
+                        name="dietary_preference" 
+                        required>
+                    <option value="non-vegetarian">Non-Vegetarian</option>
+                    <option value="vegetarian">Vegetarian</option>
+                </select>
+            </div>
+            
+            <!-- Meal Type Select -->
+            <div>
+                <label for="meal_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Meal Type</label>
+                <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                        id="meal_type" 
+                        name="meal_type" 
+                        required>
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snacks">Snacks</option>
+                </select>
+            </div>
+            
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" 
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Generate Meal Plan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% include 'footer.html' %}
+
+</body>
+</html> 
