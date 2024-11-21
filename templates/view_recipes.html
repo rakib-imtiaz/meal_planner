@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Recipes - Onno Mitro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    <style>
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    {% include 'header.html' %}
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Browse Recipes</h1>
+            <p class="text-gray-600 dark:text-gray-400">Explore our collection of healthy and delicious recipes</p>
+        </div>
+
+        <!-- Recipe Categories -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+            <!-- All Recipes -->
+            <div class="glass-card rounded-2xl p-6 hover-scale cursor-pointer" onclick="filterRecipes('all')">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg bg-blue-500">
+                        <i class="fas fa-utensils text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">All Recipes</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">{{ recipes|length }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakfast -->
+            <div class="glass-card rounded-2xl p-6 hover-scale cursor-pointer" onclick="filterRecipes('breakfast')">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg bg-yellow-500">
+                        <i class="fas fa-coffee text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Breakfast</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                            {{ recipes|selectattr('is_breakfast')|list|length }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lunch/Dinner -->
+            <div class="glass-card rounded-2xl p-6 hover-scale cursor-pointer" onclick="filterRecipes('main')">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg bg-green-500">
+                        <div class="p-4 rounded-lg bg-green-500">
+                            <i class="fas fa-drumstick-bite text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Main Meals</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                            {# Use a set to avoid double counting lunch/dinner recipes #}
+                            {% set main_meals = [] %}
+                            {% for recipe in recipes %}
+                                {% if recipe.is_lunch or recipe.is_dinner %}
+                                    {% if recipe.id not in main_meals %}
+                                        {% set _ = main_meals.append(recipe.id) %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ main_meals|length }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vegetarian -->
+            <div class="glass-card rounded-2xl p-6 hover-scale cursor-pointer" onclick="filterRecipes('vegetarian')">
+                <div class="flex items-center">
+                    <div class="p-4 rounded-lg bg-purple-500">
+                        <i class="fas fa-leaf text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Vegetarian</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                            {{ recipes|selectattr('is_vegetarian')|list|length }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="glass-card rounded-2xl p-6 mb-8">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" 
+                       id="recipeSearch" 
+                       placeholder="Search recipes..." 
+                       class="w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300">
+            </div>
+        </div>
+
+        <!-- Recipe Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="recipeGrid">
+            {% for recipe in recipes %}
+            <div class="glass-card rounded-2xl overflow-hidden hover-scale" 
+                 data-recipe-name="{{ recipe.name|lower }}"
+                 data-category="{% if recipe.is_breakfast %}breakfast{% elif recipe.is_lunch or recipe.is_dinner %}main{% endif %}{% if recipe.is_vegetarian %} vegetarian{% endif %}">
+                <!-- Recipe Image -->
+                {% if recipe.image %}
+                    <img src="{{ recipe.image }}" 
+                         alt="{{ recipe.name }}"
+                         class="w-full h-48 object-cover"
+                         onerror="this.src='{{ url_for('static', filename='images/default-recipe.jpg') }}'">
+                {% else %}
+                    <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-utensils text-4xl text-gray-400"></i>
+                    </div>
+                {% endif %}
+
+                <!-- Recipe Details -->
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">{{ recipe.name }}</h3>
+                    
+                    <!-- Recipe Categories -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        {% if recipe.is_breakfast %}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Breakfast
+                            </span>
+                        {% endif %}
+                        {% if recipe.is_lunch %}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Lunch
+                            </span>
+                        {% endif %}
+                        {% if recipe.is_dinner %}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                Dinner
+                            </span>
+                        {% endif %}
+                        {% if recipe.is_vegetarian %}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Vegetarian
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Recipe Info -->
+                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span><i class="far fa-clock mr-1"></i>{{ recipe.prep_time_in_mins + recipe.cook_time_in_mins }} min</span>
+                        <span><i class="fas fa-fire mr-1"></i>{{ recipe.energy_per_serving_kcal }} kcal</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <script>
+        // Search functionality
+        document.getElementById('recipeSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const recipes = document.querySelectorAll('#recipeGrid > div');
+            
+            recipes.forEach(recipe => {
+                const recipeName = recipe.getAttribute('data-recipe-name');
+                if (recipeName.includes(searchTerm)) {
+                    recipe.style.display = 'block';
+                } else {
+                    recipe.style.display = 'none';
+                }
+            });
+        });
+
+        // Filter recipes by category
+        function filterRecipes(category) {
+            const recipes = document.querySelectorAll('#recipeGrid > div');
+            
+            recipes.forEach(recipe => {
+                const categories = recipe.getAttribute('data-category').split(' ');
+                if (category === 'all' || categories.includes(category)) {
+                    recipe.style.display = 'block';
+                } else {
+                    recipe.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize dark mode
+        if (localStorage.getItem('darkMode') === 'dark' || 
+            (!localStorage.getItem('darkMode') && 
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>

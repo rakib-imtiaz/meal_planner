@@ -28,6 +28,7 @@
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Current Weight Card -->
             <div class="bg-white p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-100 p-3 rounded-full">
@@ -39,28 +40,36 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-lg shadow-md">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-green-100 p-3 rounded-full">
-                        <i class="fas fa-fire text-green-500"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-500">Daily Calories</p>
-                        <p class="text-xl font-bold">{{ daily_calories }} kcal</p>
-                    </div>
-                </div>
-            </div>
+
+            <!-- BMI-Based Calories Card -->
             <div class="bg-white p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
                     <div class="bg-purple-100 p-3 rounded-full">
-                        <i class="fas fa-bullseye text-purple-500"></i>
+                        <i class="fas fa-calculator text-purple-500"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500">Goal</p>
-                        <p class="text-xl font-bold capitalize">{{ user.goal }}</p>
+                        <p class="text-gray-500">BMI-Based Calories</p>
+                        <p class="text-xl font-bold">{{ bmi_calories }} kcal</p>
+                        <p class="text-sm text-gray-500">BMI: {{ "%.1f"|format(bmi_value) }} ({{ bmi_category }})</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Goal-Based Calories Card -->
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-bullseye text-green-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Goal-Based Calories</p>
+                        <p class="text-xl font-bold">{{ goal_calories }} kcal</p>
+                        <p class="text-sm text-gray-500">Goal: {{ user.goal }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Level Card -->
             <div class="bg-white p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
                     <div class="bg-orange-100 p-3 rounded-full">
@@ -69,6 +78,7 @@
                     <div>
                         <p class="text-gray-500">Activity Level</p>
                         <p class="text-xl font-bold capitalize">{{ user.activity_level }}</p>
+                        <p class="text-sm text-gray-500">Multiplier: {{ activity_multiplier }}x</p>
                     </div>
                 </div>
             </div>
@@ -148,7 +158,7 @@
                 <h3 class="text-lg font-semibold mb-2">Update Profile</h3>
                 <p class="text-gray-600">Keep your information up to date for better recommendations.</p>
             </a>
-            <a href="{{ url_for('add_recipe') }}" 
+            <a href="{{ url_for('browse_recipes') }}" 
                class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
                 <i class="fas fa-utensils text-2xl text-green-500 mb-3"></i>
                 <h3 class="text-lg font-semibold mb-2">Browse Recipes</h3>

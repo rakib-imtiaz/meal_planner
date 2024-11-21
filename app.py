@@ -567,15 +567,15 @@ def edit_profile():
     
     if request.method == 'POST':
         try:
-            # Update user information with type conversion and validation
+            # Update user information
             user.name = request.form.get('name')
             user.age = int(request.form.get('age', 0))
             user.sex = request.form.get('sex')
             user.weight = float(request.form.get('weight', 0))
             user.height = float(request.form.get('height', 0))
-            user.activity_level = request.form.get('activity_level')
+            user.activity_level = request.form.get('activity_level')  # This should match the select options
             user.goal = request.form.get('goal')
-            user.dietary_restrictions = request.form.get('dietary_restrictions')
+            user.dietary_restrictions = request.form.get('dietary_restrictions', '')
             
             # Validate required fields
             if not all([user.name, user.age, user.sex, user.weight, user.height, user.activity_level, user.goal]):
@@ -593,7 +593,10 @@ def edit_profile():
             db.session.rollback()
             flash(f'Error updating profile: {str(e)}', 'error')
     
-    return render_template('edit_profile.html', user=user)
+    return render_template('edit_profile.html', 
+                         user=user,
+                         activity_levels=['Sedentary', 'Light', 'Moderate', 'Very Active', 'Super Active'],
+                         goals=['Maintain', 'Weight loss', 'Extreme weight loss', 'Weight gain'])
 
 @app.route('/dashboard')
 @login_required
@@ -601,16 +604,46 @@ def dashboard():
     user = User.query.get(session['user_id'])
     
     # Check if user profile is complete
-    if user.weight is None or user.height is None or user.age is None or user.activity_level is None:
+    if not all([user.weight, user.height, user.age, user.activity_level, user.goal]):
         flash('Please complete your profile first', 'warning')
         return redirect(url_for('edit_profile'))
     
     try:
-        # Calculate daily calories and nutrition info
         recommender = DietRecommender()
-        nutritional_needs = recommender.calculate_nutritional_needs(user)
         
-        # Get meal recommendations
+        # Calculate BMI and BMI-based calories
+        bmi_data = recommender.calculate_bmi(user)
+        bmi_value = bmi_data['value']
+        bmi_category = bmi_data['category']
+        
+        # Get activity multiplier from string-based activity level
+        activity_multiplier = recommender.activity_levels.get(user.activity_level, 1.55)
+        
+        # Calculate BMR
+        bmr = recommender.calculate_bmr(user)
+        
+        # BMI-based calorie calculation
+        if bmi_value < 18.5:  # Underweight
+            bmi_calories = round(bmr * activity_multiplier * 1.2)  # 20% surplus
+        elif 18.5 <= bmi_value < 25:  # Normal weight
+            bmi_calories = round(bmr * activity_multiplier)
+        else:  # Overweight/Obese
+            bmi_calories = round(bmr * activity_multiplier * 0.8)  # 20% deficit
+        
+        # Calculate goal-based calories
+        maintenance_calories = bmr * activity_multiplier
+        
+        if user.goal == "Weight loss":
+            goal_calories = round(maintenance_calories * 0.8)
+        elif user.goal == "Extreme weight loss":
+            goal_calories = round(maintenance_calories * 0.6)
+        elif user.goal == "Weight gain":
+            goal_calories = round(maintenance_calories * 1.2)
+        else:  # Maintain
+            goal_calories = round(maintenance_calories)
+        
+        # Get meal recommendations and nutrition info
+        nutritional_needs = recommender.calculate_nutritional_needs(user)
         meal_recommendations = {
             'breakfast': recommender.recommend_meals(user, 'breakfast')[0] if recommender.recommend_meals(user, 'breakfast') else None,
             'lunch': recommender.recommend_meals(user, 'lunch')[0] if recommender.recommend_meals(user, 'lunch') else None,
@@ -618,8 +651,8 @@ def dashboard():
             'snack': recommender.recommend_meals(user, 'snack')[0] if recommender.recommend_meals(user, 'snack') else None
         }
         
-        # Calculate nutrition percentages with safety checks
-        total_calories = nutritional_needs.get('calories', 2000)  # Default to 2000 if not set
+        # Calculate nutrition percentages
+        total_calories = nutritional_needs.get('calories', 2000)
         nutrition = {
             'protein': round(nutritional_needs.get('protein', 0)),
             'protein_percentage': min(round((nutritional_needs.get('protein', 0) / total_calories) * 400), 100),
@@ -631,7 +664,11 @@ def dashboard():
         
         return render_template('dashboard.html',
                              user=user,
-                             daily_calories=round(total_calories),
+                             bmi_value=bmi_value,
+                             bmi_category=bmi_category,
+                             bmi_calories=bmi_calories,
+                             goal_calories=goal_calories,
+                             activity_multiplier=activity_multiplier,
                              meal_recommendations=meal_recommendations,
                              nutrition=nutrition)
                              
@@ -643,6 +680,12 @@ def dashboard():
 @app.context_processor
 def inject_now():
     return {'now': datetime.now()}
+
+@app.route('/browse_recipes')
+@login_required
+def browse_recipes():
+    recipes = Recipe.query.all()
+    return render_template('view_recipes.html', recipes=recipes)
 
 if __name__ == '__main__':
     with app.app_context():

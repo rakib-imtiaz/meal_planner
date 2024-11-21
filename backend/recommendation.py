@@ -6,11 +6,11 @@ from sqlalchemy import and_
 class DietRecommender:
     def __init__(self):
         self.activity_levels = {
-            1: 1.2,    # Sedentary
-            2: 1.375,  # Lightly active
-            3: 1.55,   # Moderately active
-            4: 1.725,  # Very active
-            5: 1.9     # Super active
+            'Sedentary': 1.2,      # Little or no exercise
+            'Light': 1.375,        # Light exercise/sports 1-3 days/week
+            'Moderate': 1.55,      # Moderate exercise/sports 3-5 days/week
+            'Very Active': 1.725,  # Hard exercise/sports 6-7 days/week
+            'Super Active': 1.9    # Very hard exercise/sports & physical job
         }
 
     def calculate_bmr(self, user):

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Progress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Development Progress</h1>
+            
+            <!-- Add Note Form -->
+            <div class="mb-6">
+                <input type="text" id="newNote" placeholder="Enter new note" class="w-full p-2 border rounded-lg">
+                <button onclick="addNote()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Note</button>
+            </div>
+
+            <div class="space-y-4" id="notes">
+                <!-- Notes will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-bold mb-4">Edit Note</h2>
+            <input type="text" id="editNoteInput" class="w-full p-2 border rounded-lg mb-4">
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeEditModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+                <button onclick="saveEdit()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let notes = [];
+        let editingId = null;
+
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('notes');
+            notes = savedNotes ? JSON.parse(savedNotes) : [];
+            renderNotes();
+        }
+
+        function saveNotes() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function renderNotes() {
+            const notesContainer = document.getElementById('notes');
+            notesContainer.innerHTML = '';
+            
+            notes.forEach((note, index) => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition';
+                noteElement.innerHTML = `
+                    <label class="flex items-center flex-grow">
+                        <input type="checkbox" ${note.checked ? 'checked' : ''} 
+                               onchange="toggleNote(${index})"
+                               class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">${note.text}</span>
+                    </label>
+                    <div class="flex space-x-2">
+                        <button onclick="editNote(${index})" class="text-blue-500 hover:text-blue-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </button>
+                        <button onclick="deleteNote(${index})" class="text-red-500 hover:text-red-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                notesContainer.appendChild(noteElement);
+            });
+        }
+
+        function addNote() {
+            const input = document.getElementById('newNote');
+            const text = input.value.trim();
+            if (text) {
+                notes.push({ text, checked: false });
+                saveNotes();
+                renderNotes();
+                input.value = '';
+            }
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            saveNotes();
+            renderNotes();
+        }
+
+        function editNote(index) {
+            editingId = index;
+            const modal = document.getElementById('editModal');
+            const input = document.getElementById('editNoteInput');
+            input.value = notes[index].text;
+            modal.classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+            editingId = null;
+        }
+
+        function saveEdit() {
+            const input = document.getElementById('editNoteInput');
+            const text = input.value.trim();
+            if (text && editingId !== null) {
+                notes[editingId].text = text;
+                saveNotes();
+                renderNotes();
+                closeEditModal();
+            }
+        }
+
+        function toggleNote(index) {
+            notes[index].checked = !notes[index].checked;
+            saveNotes();
+        }
+
+        // Initialize notes on page load
+        document.addEventListener("DOMContentLoaded", loadNotes);
+    </script>
+</body>
+</html>
