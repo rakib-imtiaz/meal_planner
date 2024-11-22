@@ -484,9 +484,11 @@ def edit_recipe(recipe_name):
             return redirect(url_for('edit_recipe', recipe_name=recipe_name))
 
 @app.route('/generate_meal_plan', methods=['GET', 'POST'])
+@login_required  # Add this decorator to ensure user is logged in
 def generate_meal_plan():
     if request.method == 'GET':
-        return render_template('meal_plan_form.html')
+        user = User.query.get(session['user_id'])  # Get the current user
+        return render_template('meal_plan_form.html', user=user)
         
     try:
         # Create a temporary user object from form data
@@ -601,7 +603,12 @@ def edit_profile():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    user = User.query.get(session['user_id'])
+    user = User.query.get(session.get('user_id'))
+    
+    # Check if user exists
+    if not user:
+        flash('User not found. Please log in again.', 'error')
+        return redirect(url_for('login'))
     
     # Check if user profile is complete
     if not all([user.weight, user.height, user.age, user.activity_level, user.goal]):

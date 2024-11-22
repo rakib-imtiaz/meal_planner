@@ -28,10 +28,11 @@
             <div>
                 <label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Age</label>
                 <input type="number" 
+                       value="{{ user.age }}"
                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                        id="age" 
-                       name="age" 
-                       required>
+                       name="age"
+                       readonly>
             </div>
             
             <!-- Height Input -->
@@ -39,22 +40,20 @@
                 <div>
                     <label for="height_ft" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Height (ft)</label>
                     <input type="number" 
+                           value="{{ (user.height / 30.48) | int }}"
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                            id="height_ft" 
-                           name="height_ft" 
-                           min="0"
-                           max="8"
-                           required>
+                           name="height_ft"
+                           readonly>
                 </div>
                 <div>
                     <label for="height_in" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Height (in)</label>
                     <input type="number" 
+                           value="{{ ((user.height / 2.54) % 12) | int }}"
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                            id="height_in" 
-                           name="height_in" 
-                           min="0"
-                           max="11"
-                           required>
+                           name="height_in"
+                           readonly>
                 </div>
             </div>
             
@@ -63,10 +62,11 @@
                 <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Weight (kg)</label>
                 <input type="number" 
                        step="0.01" 
+                       value="{{ user.weight }}"
                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                        id="weight" 
-                       name="weight" 
-                       required>
+                       name="weight"
+                       readonly>
             </div>
             
             <!-- Gender Select -->
@@ -74,10 +74,10 @@
                 <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
                 <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                         id="gender" 
-                        name="gender" 
-                        required>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
+                        name="gender"
+                        disabled>
+                    <option value="Male" {% if user.sex == 'male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if user.sex == 'female' %}selected{% endif %}>Female</option>
                 </select>
             </div>
             
@@ -86,13 +86,12 @@
                 <label for="activity_level" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Activity Level</label>
                 <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                         id="activity_level" 
-                        name="activity_level" 
-                        required>
-                    <option value="1">Sedentary</option>
-                    <option value="2">Lightly Active</option>
-                    <option value="3">Moderately Active</option>
-                    <option value="4">Very Active</option>
-                    <option value="5">Extra Active</option>
+                        name="activity_level"
+                        disabled>
+                    <option value="1" {% if user.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
+                    <option value="2" {% if user.activity_level == 'light' %}selected{% endif %}>Lightly Active</option>
+                    <option value="3" {% if user.activity_level == 'moderate' %}selected{% endif %}>Moderately Active</option>
+                    <option value="4" {% if user.activity_level == 'very' %}selected{% endif %}>Very Active</option>
                 </select>
             </div>
             
