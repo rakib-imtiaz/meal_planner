@@ -60,6 +60,11 @@
                 <div class="animate__animated animate__fadeInUp">
                     <h2 class="text-2xl font-bold mb-4 capitalize">{{ meal_type }} ({{ diet_data.calories[meal_type] }} kcal)</h2>
                     {% if recipes %}
+                    <button onclick="showDifferentMeals('{{ meal_type }}')"
+                            class="mb-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 px-5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh Meal Options</span>
+                    </button>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="meals-container-{{ meal_type }}">
                         {% for recipe in recipes %}
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
@@ -96,14 +101,8 @@
 
                                 <!-- Add Select Button -->
                                 <button onclick="selectMeal('{{ recipe.name }}', {{ recipe.energy_per_serving_kcal }})"
-                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-2">
+                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
                                     Select Meal
-                                </button>
-
-                                <!-- Add Show Different Meals Button -->
-                                <button onclick="showDifferentMeals('{{ meal_type }}')"
-                                        class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4">
-                                    Show Different Meals
                                 </button>
 
                                 <!-- Ingredients and Instructions Collapse -->
@@ -274,13 +273,8 @@
                                 </div>
 
                                 <button onclick="selectMeal('${recipe.name}', ${recipe.energy_per_serving_kcal})"
-                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-2">
+                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
                                     Select Meal
-                                </button>
-
-                                <button onclick="showDifferentMeals('${mealType}')"
-                                        class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4">
-                                    Show Different Meals
                                 </button>
                             </div>
                         </div>
