@@ -694,6 +694,67 @@ def browse_recipes():
     recipes = Recipe.query.all()
     return render_template('view_recipes.html', recipes=recipes)
 
+@app.route('/get_different_meals/<meal_type>')
+@login_required
+def get_different_meals(meal_type):
+    try:
+        # Update to use Session.get()
+        user = db.session.get(User, session['user_id'])
+        recommender = DietRecommender()
+        
+        print(f"Fetching new meals for type: {meal_type}")
+        
+        # Query recipes directly based on meal type
+        meal_type_column = {
+            'breakfast': Recipe.is_breakfast,
+            'lunch': Recipe.is_lunch,
+            'dinner': Recipe.is_dinner,
+            'snack': Recipe.is_snack
+        }.get(meal_type.lower())
+        
+        if not meal_type_column:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid meal type: {meal_type}'
+            }), 400
+        
+        # Get 3 random recipes for the specified meal type
+        new_meals = Recipe.query.filter(meal_type_column == True).order_by(db.func.random()).limit(3).all()
+        
+        if not new_meals:
+            print(f"No meals found for type: {meal_type}")
+            return jsonify({
+                'success': False,
+                'error': 'No meals found'
+            }), 404
+        
+        # Format the meals for the response
+        meals_data = [{
+            'name': recipe.name,
+            'image': recipe.image,
+            'serving_size': recipe.serving_size,
+            'energy_per_serving_kcal': recipe.energy_per_serving_kcal,
+            'protein_per_serving_g': recipe.protein_per_serving_g,
+            'carbohydrate_per_serving_g': recipe.carbohydrate_per_serving_g,
+            'fat_per_serving_g': recipe.fat_per_serving_g,
+            'fiber_per_serving_g': recipe.fiber_per_serving_g,
+            'ingredients': recipe.ingredients,
+            'instructions': recipe.instructions
+        } for recipe in new_meals]
+        
+        print(f"Returning {len(meals_data)} new meals")
+        return jsonify({
+            'success': True,
+            'meals': meals_data
+        })
+        
+    except Exception as e:
+        print(f"Error in get_different_meals: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

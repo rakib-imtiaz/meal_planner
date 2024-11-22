@@ -60,7 +60,7 @@
                 <div class="animate__animated animate__fadeInUp">
                     <h2 class="text-2xl font-bold mb-4 capitalize">{{ meal_type }} ({{ diet_data.calories[meal_type] }} kcal)</h2>
                     {% if recipes %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="meals-container-{{ meal_type }}">
                         {% for recipe in recipes %}
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                             {% if recipe.image %}
@@ -96,8 +96,14 @@
 
                                 <!-- Add Select Button -->
                                 <button onclick="selectMeal('{{ recipe.name }}', {{ recipe.energy_per_serving_kcal }})"
-                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
+                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-2">
                                     Select Meal
+                                </button>
+
+                                <!-- Add Show Different Meals Button -->
+                                <button onclick="showDifferentMeals('{{ meal_type }}')"
+                                        class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4">
+                                    Show Different Meals
                                 </button>
 
                                 <!-- Ingredients and Instructions Collapse -->
@@ -215,6 +221,88 @@
             icon.style.transform = 'rotate(0deg)';
         }
     }
+
+    function showDifferentMeals(mealType) {
+        // Show loading state or spinner if desired
+        const container = document.getElementById(`meals-container-${mealType}`);
+        if (!container) {
+            console.error('Container not found for meal type:', mealType);
+            return;
+        }
+        
+        // Add loading indicator
+        container.innerHTML = '<div class="col-span-full text-center">Loading new meals...</div>';
+
+        fetch(`/get_different_meals/${mealType}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.meals) {
+                    container.innerHTML = data.meals.map(recipe => `
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
+                            ${recipe.image ? 
+                                `<img src="${recipe.image}" alt="${recipe.name}" class="w-full h-48 object-cover">` :
+                                `<div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-400">No image available</span>
+                                </div>`
+                            }
+                            
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-3">${recipe.name}</h3>
+                                
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Calories:</span>
+                                        <span class="font-semibold">${recipe.energy_per_serving_kcal} kcal</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Protein:</span>
+                                        <span class="font-semibold">${recipe.protein_per_serving_g}g</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Carbs:</span>
+                                        <span class="font-semibold">${recipe.carbohydrate_per_serving_g}g</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Fat:</span>
+                                        <span class="font-semibold">${recipe.fat_per_serving_g}g</span>
+                                    </div>
+                                </div>
+
+                                <button onclick="selectMeal('${recipe.name}', ${recipe.energy_per_serving_kcal})"
+                                        class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-2">
+                                    Select Meal
+                                </button>
+
+                                <button onclick="showDifferentMeals('${mealType}')"
+                                        class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4">
+                                    Show Different Meals
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="col-span-full text-center text-red-500">No alternative meals available</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="col-span-full text-center text-red-500">Error loading meals. Please try again.</div>';
+            });
+    }
+
+    // Add this for debugging
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('JavaScript loaded');
+        // Log all meal type containers
+        document.querySelectorAll('[id^="meals-container-"]').forEach(container => {
+            console.log('Found container:', container.id);
+        });
+    });
     </script>
 
     <style>
