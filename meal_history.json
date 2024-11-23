@@ -1,39 +1,34 @@
 {
-    "user_id": {
-        "2024-03-14": {
-            "meals": {
-                "breakfast": {
-                    "recipe_name": "Oatmeal",
-                    "calories": 300,
-                    "time_selected": "08:30:45"
-                },
-                "lunch": {
-                    "recipe_name": "Chicken Salad",
-                    "calories": 450,
-                    "time_selected": "12:15:22"
-                }
-            },
-            "total_calories": 750,
-            "remaining_calories": 2250
-        }
-    },
     "1": {
         "2024-11-23": {
             "meals": {
-                "undefined": {
-                    "recipe_name": "Chola Chaat",
-                    "calories": 180,
-                    "time_selected": "07:08:19"
+                "snack": {
+                    "recipe_name": "Egg Sandwich",
+                    "calories": 734.0,
+                    "time_selected": "21:09:30",
+                    "recipe_id": 0
                 },
                 "breakfast": {
-                    "recipe_name": "Butter Naan",
-                    "calories": 165.0,
-                    "time_selected": "20:51:22",
-                    "recipe_id": 0
+                    "recipe_name": "Egg Sandwich",
+                    "calories": 734.0,
+                    "time_selected": "21:09:37",
+                    "recipe_id": 60149
+                },
+                "lunch": {
+                    "recipe_name": "Kachchi Biryani",
+                    "calories": 896.0,
+                    "time_selected": "21:09:39",
+                    "recipe_id": 60121
+                },
+                "dinner": {
+                    "recipe_name": "Kachchi Biryani",
+                    "calories": 896.0,
+                    "time_selected": "21:09:43",
+                    "recipe_id": 60121
                 }
             },
-            "total_calories": 345.0,
-            "remaining_calories": 1655.0
+            "total_calories": 3260.0,
+            "remaining_calories": -1260.0
         }
     }
 }

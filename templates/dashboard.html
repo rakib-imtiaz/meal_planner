@@ -90,7 +90,7 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-4">Today's Meal Plan</h2>
                 <div class="space-y-4">
-                    {% for meal_type in ['breakfast', 'lunch', 'dinner', 'snacks'] %}
+                    {% for meal_type in ['breakfast', 'lunch', 'dinner', 'snack'] %}
                     <div class="border-b pb-4 last:border-b-0">
                         <h3 class="text-lg font-semibold capitalize mb-2">{{ meal_type }}</h3>
                         {% if today_meals.get(meal_type) %}
@@ -259,6 +259,9 @@
         // Convert recipeId to number or default to 0
         const id = parseInt(recipeId) || 0;
         
+        // Don't convert 'snacks' to 'snack'
+        const normalizedMealType = mealType.toLowerCase();
+        
         fetch('/select_meal', {
             method: 'POST',
             headers: {
@@ -267,7 +270,7 @@
             body: JSON.stringify({
                 recipe_name: recipeName,
                 calories: parseFloat(calories),
-                meal_type: mealType.toLowerCase(),
+                meal_type: normalizedMealType,
                 recipe_id: id
             })
         })

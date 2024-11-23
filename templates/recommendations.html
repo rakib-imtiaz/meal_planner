@@ -171,6 +171,9 @@
     }
 
     function selectMeal(recipeName, calories, mealType) {
+        // Normalize meal type
+        const normalizedMealType = mealType.toLowerCase() === 'snacks' ? 'snack' : mealType.toLowerCase();
+        
         fetch('/select_meal', {
             method: 'POST',
             headers: {
@@ -179,16 +182,13 @@
             body: JSON.stringify({
                 recipe_name: recipeName,
                 calories: calories,
-                meal_type: mealType
+                meal_type: normalizedMealType
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Show success message
-                alert(`Successfully selected ${recipeName} for ${mealType}`);
-                
-                // Redirect to dashboard
+                alert(`Successfully selected ${recipeName} for ${normalizedMealType}`);
                 window.location.href = '/dashboard';
             } else {
                 alert(data.message);

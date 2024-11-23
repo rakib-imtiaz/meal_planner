@@ -834,13 +834,23 @@ def select_meal():
         user_id = str(session['user_id'])
         today = datetime.now().strftime('%Y-%m-%d')
         
-        # Get user from database to access daily_calorie_goal
+        # Get user from database
         user = db.session.get(User, session['user_id'])
         if not user:
             return jsonify({
                 'success': False,
                 'message': 'User not found'
             }), 404
+        
+        # Normalize meal type (don't convert snacks to snack)
+        meal_type = data.get('meal_type', '').lower()
+            
+        # Verify meal_type is valid
+        if meal_type not in ['breakfast', 'lunch', 'dinner', 'snack']:
+            return jsonify({
+                'success': False,
+                'message': f'Invalid meal type: {meal_type}'
+            }), 400
         
         # Load existing history
         history = load_meal_history()
@@ -862,13 +872,6 @@ def select_meal():
                 'message': 'Meal type is required'
             }), 400
             
-        meal_type = data['meal_type'].lower()
-        if meal_type not in ['breakfast', 'lunch', 'dinner', 'snack']:
-            return jsonify({
-                'success': False,
-                'message': 'Invalid meal type'
-            }), 400
-        
         # Check if meal type already selected for today
         if meal_type in history[user_id][today]['meals']:
             return jsonify({
