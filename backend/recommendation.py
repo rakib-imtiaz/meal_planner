@@ -69,12 +69,13 @@ class DietRecommender:
     def recommend_meals(self, user, meal_type):
         try:
             nutritional_needs = self.calculate_nutritional_needs(user)
-            meal_calories = self.get_meal_distribution(nutritional_needs['calories'])[meal_type]
+            meal_calories = self.get_meal_distribution(nutritional_needs['calories'])[meal_type.lower()]
             
             # Query recipes
             query = Recipe.query.filter(
                 and_(
-                    getattr(Recipe, f'is_{meal_type}') == True,
+                    Recipe.is_snack == True if meal_type.lower() == 'snacks' else 
+                    getattr(Recipe, f'is_{meal_type.lower().rstrip("s")}') == True,
                     Recipe.energy_per_serving_kcal.between(meal_calories * 0.8, meal_calories * 1.2)
                 )
             )
