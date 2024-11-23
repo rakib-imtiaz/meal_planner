@@ -229,14 +229,12 @@
     }
 
     function showDifferentMeals(mealType) {
-        // Show loading state or spinner if desired
         const container = document.getElementById(`meals-container-${mealType}`);
         if (!container) {
             console.error('Container not found for meal type:', mealType);
             return;
         }
         
-        // Add loading indicator
         container.innerHTML = '<div class="col-span-full text-center">Loading new meals...</div>';
 
         fetch(`/get_different_meals/${mealType}`)
@@ -279,7 +277,7 @@
                                     </div>
                                 </div>
 
-                                <button onclick="selectMeal('${recipe.name}', ${recipe.energy_per_serving_kcal}, '${recipe.meal_type}')"
+                                <button onclick="selectMeal('${recipe.name}', ${recipe.energy_per_serving_kcal}, '${mealType}', ${recipe.id})"
                                         class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
                                     Select Meal
                                 </button>

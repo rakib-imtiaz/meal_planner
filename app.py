@@ -710,7 +710,6 @@ def browse_recipes():
 @login_required
 def get_different_meals(meal_type):
     try:
-        # Update to use Session.get()
         user = db.session.get(User, session['user_id'])
         recommender = DietRecommender()
         
@@ -734,34 +733,31 @@ def get_different_meals(meal_type):
         new_meals = Recipe.query.filter(meal_type_column == True).order_by(db.func.random()).limit(3).all()
         
         if not new_meals:
-            print(f"No meals found for type: {meal_type}")
             return jsonify({
                 'success': False,
-                'error': 'No meals found'
+                'error': f'No meals found for type: {meal_type}'
             }), 404
         
-        # Format the meals for the response
-        meals_data = [{
+        # Format meals with all necessary information including ID
+        formatted_meals = [{
+            'id': recipe.id,  # Make sure to include the ID
             'name': recipe.name,
             'image': recipe.image,
-            'serving_size': recipe.serving_size,
             'energy_per_serving_kcal': recipe.energy_per_serving_kcal,
             'protein_per_serving_g': recipe.protein_per_serving_g,
             'carbohydrate_per_serving_g': recipe.carbohydrate_per_serving_g,
             'fat_per_serving_g': recipe.fat_per_serving_g,
-            'fiber_per_serving_g': recipe.fiber_per_serving_g,
-            'ingredients': recipe.ingredients,
-            'instructions': recipe.instructions
+            'serving_size': recipe.serving_size,
+            'meal_type': meal_type  # Include the meal type
         } for recipe in new_meals]
         
-        print(f"Returning {len(meals_data)} new meals")
         return jsonify({
             'success': True,
-            'meals': meals_data
+            'meals': formatted_meals
         })
         
     except Exception as e:
-        print(f"Error in get_different_meals: {str(e)}")
+        print(f"Error getting different meals: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -830,11 +826,12 @@ def select_meal():
                 'message': f'You have already selected {meal_type} for today'
             }), 400
         
-        # Add new meal
+        # Add new meal (recipe_id is optional)
         history[user_id][today]['meals'][meal_type] = {
             'recipe_name': data['recipe_name'],
             'calories': float(data['calories']),
-            'time_selected': datetime.now().strftime('%H:%M:%S')
+            'time_selected': datetime.now().strftime('%H:%M:%S'),
+            'recipe_id': data.get('recipe_id', 0)  # Default to 0 if not provided
         }
         
         # Update calories

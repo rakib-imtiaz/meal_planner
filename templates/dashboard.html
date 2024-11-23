@@ -119,7 +119,11 @@
                                 <div>
                                     <p class="font-medium">{{ meal_recommendations[meal_type].name }}</p>
                                     <p class="text-sm text-gray-500">{{ meal_recommendations[meal_type].energy_per_serving_kcal }} kcal</p>
-                                    <button onclick="selectMeal('{{ meal_recommendations[meal_type].name }}', {{ meal_recommendations[meal_type].energy_per_serving_kcal }}, '{{ meal_type }}')"
+                                    <button onclick="selectMeal(
+                                        '{{ meal_recommendations[meal_type].name }}', 
+                                        {{ meal_recommendations[meal_type].energy_per_serving_kcal }}, 
+                                        '{{ meal_type }}',
+                                        '{{ meal_recommendations[meal_type].id if meal_recommendations[meal_type].id else 0 }}')"
                                             class="text-xs text-green-500 hover:text-green-600">
                                         Select this meal
                                     </button>
@@ -248,11 +252,14 @@
         }
     }
 
-    function selectMeal(recipeName, calories, mealType) {
+    function selectMeal(recipeName, calories, mealType, recipeId) {
         if (!mealType) {
             alert('Meal type is required');
             return;
         }
+        
+        // Convert recipeId to number or default to 0
+        const id = parseInt(recipeId) || 0;
         
         fetch('/select_meal', {
             method: 'POST',
@@ -262,7 +269,8 @@
             body: JSON.stringify({
                 recipe_name: recipeName,
                 calories: parseFloat(calories),
-                meal_type: mealType.toLowerCase()
+                meal_type: mealType.toLowerCase(),
+                recipe_id: id
             })
         })
         .then(response => {
