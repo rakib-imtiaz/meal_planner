@@ -24,16 +24,10 @@
                     "recipe_name": "Chola Chaat",
                     "calories": 180,
                     "time_selected": "07:08:19"
-                },
-                "breakfast": {
-                    "recipe_name": "Chicken Curry and Rice Roti",
-                    "calories": 677.0,
-                    "time_selected": "07:27:57",
-                    "recipe_id": 0
                 }
             },
-            "total_calories": 857.0,
-            "remaining_calories": 1143.0
+            "total_calories": 180.0,
+            "remaining_calories": 1820.0
         }
     }
 }

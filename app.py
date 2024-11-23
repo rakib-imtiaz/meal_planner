@@ -610,6 +610,13 @@ def dashboard():
     if not user:
         flash('User not found. Please log in again.', 'error')
         return redirect(url_for('login'))
+    print(f"User: {user.name}")
+    print(f"User height: {user.height}")
+    print(f"User age: {user.age}")
+    print(f"User activity level: {user.activity_level}")
+    print(f"User goal: {user.goal}")
+
+
     
     # Check if user profile is complete
     if not all([user.weight, user.height, user.age, user.activity_level, user.goal]):
@@ -619,20 +626,31 @@ def dashboard():
     try:
         recommender = DietRecommender()
         
+        # Define activity level multipliers
+        activity_multipliers = {
+            'sedentary': 1.2,      # Little or no exercise
+            'light': 1.375,        # Light exercise/sports 1-3 days/week
+            'moderate': 1.55,      # Moderate exercise/sports 3-5 days/week
+            'very': 1.725,         # Hard exercise/sports 6-7 days/week
+            'super': 1.9           # Very hard exercise/sports & physical job or training
+        }
+        
+        # Get activity multiplier based on user's activity level, default to Moderate if not found
+        activity_multiplier = activity_multipliers.get(user.activity_level, 1.55)
+        print(f"User activity level: {user.activity_level}")
+        print(f"Activity multiplier: {activity_multiplier}")
+        
         # Calculate BMI and BMI-based calories
         bmi_data = recommender.calculate_bmi(user)
         bmi_value = bmi_data['value']
         bmi_category = bmi_data['category']
-        
-        # Get activity multiplier from string-based activity level
-        activity_multiplier = recommender.activity_levels.get(user.activity_level, 1.55)
         
         # Calculate BMR
         bmr = recommender.calculate_bmr(user)
         
         # BMI-based calorie calculation
         if bmi_value < 18.5:  # Underweight
-            bmi_calories = round(bmr * activity_multiplier * 1.2)  # 20% surplus
+            bmi_calories = round(bmr * activity_multiplier * 1.2)  # 20% surplusbmi_calories
         elif 18.5 <= bmi_value < 25:  # Normal weight
             bmi_calories = round(bmr * activity_multiplier)
         else:  # Overweight/Obese
@@ -641,14 +659,18 @@ def dashboard():
         # Calculate goal-based calories
         maintenance_calories = bmr * activity_multiplier
         
-        if user.goal == "Weight loss":
-            goal_calories = round(maintenance_calories * 0.8)
-        elif user.goal == "Extreme weight loss":
-            goal_calories = round(maintenance_calories * 0.6)
-        elif user.goal == "Weight gain":
-            goal_calories = round(maintenance_calories * 1.2)
-        else:  # Maintain
+        if user.goal == "lose":
+            goal_calories = round(maintenance_calories * 0.8)  # 20% deficit
+        elif user.goal == "extreme_lose":
+            goal_calories = round(maintenance_calories * 0.6)  # 40% deficit
+        elif user.goal == "gain":
+            goal_calories = round(maintenance_calories * 1.2)  # 20% surplus
+        else:  # maintain
             goal_calories = round(maintenance_calories)
+
+
+        print(f"Goal calories: {goal_calories}")
+        print(f"BMI calories: {bmi_calories}")
             
         # Load today's meal history
         history = load_meal_history()
@@ -658,7 +680,8 @@ def dashboard():
         
         # Calculate remaining calories
         total_calories_consumed = history.get(user_id, {}).get(today, {}).get('total_calories', 0)
-        remaining_calories = goal_calories - total_calories_consumed
+        remaining_bmi_calories = bmi_calories - total_calories_consumed
+        remaining_goal_calories= goal_calories - total_calories_consumed
         
         # Get meal recommendations and nutrition info
         nutritional_needs = recommender.calculate_nutritional_needs(user)
@@ -684,8 +707,8 @@ def dashboard():
                              user=user,
                              bmi_value=bmi_value,
                              bmi_category=bmi_category,
-                             bmi_calories=remaining_calories,
-                             goal_calories=remaining_calories,
+                             bmi_calories=remaining_bmi_calories,
+                             goal_calories=remaining_goal_calories,
                              activity_multiplier=activity_multiplier,
                              meal_recommendations=meal_recommendations,
                              nutrition=nutrition,
