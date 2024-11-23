@@ -49,7 +49,7 @@
                     </div>
                     <div>
                         <p class="text-gray-500">BMI-Based Calories</p>
-                        <p class="text-xl font-bold">{{ bmi_calories }} kcal</p>
+                        <p id="bmiCalories" class="text-xl font-bold">{{ bmi_calories }} kcal</p>
                         <p class="text-sm text-gray-500">BMI: {{ "%.1f"|format(bmi_value) }} ({{ bmi_category }})</p>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                     </div>
                     <div>
                         <p class="text-gray-500">Goal-Based Calories</p>
-                        <p class="text-xl font-bold">{{ goal_calories }} kcal</p>
+                        <p id="goalCalories" class="text-xl font-bold">{{ goal_calories }} kcal</p>
                         <p class="text-sm text-gray-500">Goal: {{ user.goal }}</p>
                     </div>
                 </div>
@@ -93,18 +93,41 @@
                     {% for meal_type in ['breakfast', 'lunch', 'dinner', 'snack'] %}
                     <div class="border-b pb-4 last:border-b-0">
                         <h3 class="text-lg font-semibold capitalize mb-2">{{ meal_type }}</h3>
-                        {% if meal_recommendations[meal_type] %}
-                        <div class="flex items-center space-x-4">
-                            <img src="{{ meal_recommendations[meal_type].image }}" 
-                                 alt="{{ meal_recommendations[meal_type].name }}"
-                                 class="w-16 h-16 rounded-lg object-cover">
-                            <div>
-                                <p class="font-medium">{{ meal_recommendations[meal_type].name }}</p>
-                                <p class="text-sm text-gray-500">{{ meal_recommendations[meal_type].calories }} kcal</p>
+                        {% if today_meals.get(meal_type) %}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-utensils text-2xl text-gray-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">{{ today_meals[meal_type].recipe_name }}</p>
+                                        <p class="text-sm text-gray-500">{{ today_meals[meal_type].calories }} kcal</p>
+                                        <p class="text-xs text-gray-400">Selected at: {{ today_meals[meal_type].time_selected }}</p>
+                                    </div>
+                                </div>
+                                <button onclick="removeMeal('{{ meal_type }}')"
+                                        class="text-red-500 hover:text-red-600 focus:outline-none">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                        </div>
                         {% else %}
-                        <p class="text-gray-500">No recommendation yet</p>
+                            {% if meal_recommendations[meal_type] %}
+                            <div class="flex items-center space-x-4">
+                                <img src="{{ meal_recommendations[meal_type].image }}" 
+                                     alt="{{ meal_recommendations[meal_type].name }}"
+                                     class="w-16 h-16 rounded-lg object-cover">
+                                <div>
+                                    <p class="font-medium">{{ meal_recommendations[meal_type].name }}</p>
+                                    <p class="text-sm text-gray-500">{{ meal_recommendations[meal_type].energy_per_serving_kcal }} kcal</p>
+                                    <button onclick="selectMeal('{{ meal_recommendations[meal_type].name }}', {{ meal_recommendations[meal_type].energy_per_serving_kcal }}, '{{ meal_type }}')"
+                                            class="text-xs text-green-500 hover:text-green-600">
+                                        Select this meal
+                                    </button>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-gray-500">No recommendation yet</p>
+                            {% endif %}
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -176,6 +199,93 @@
 
     <script>
         // Add any JavaScript functionality here
+    </script>
+
+    <script>
+    function updateCaloriesDisplay(remainingCalories) {
+        const bmiElement = document.getElementById('bmiCalories');
+        const goalElement = document.getElementById('goalCalories');
+        
+        if (bmiElement) {
+            bmiElement.textContent = `${Math.round(remainingCalories)} kcal`;
+        }
+        if (goalElement) {
+            goalElement.textContent = `${Math.round(remainingCalories)} kcal`;
+        }
+    }
+
+    function removeMeal(mealType) {
+        if (!mealType) {
+            alert('Meal type is required');
+            return;
+        }
+
+        if (confirm(`Are you sure you want to remove this ${mealType}?`)) {
+            fetch('/remove_meal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    meal_type: mealType.toLowerCase()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the calories displays
+                    updateCaloriesDisplay(data.remaining_calories);
+                    // Reload the page to update the meal plan display
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error removing meal');
+            });
+        }
+    }
+
+    function selectMeal(recipeName, calories, mealType) {
+        if (!mealType) {
+            alert('Meal type is required');
+            return;
+        }
+        
+        fetch('/select_meal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                recipe_name: recipeName,
+                calories: parseFloat(calories),
+                meal_type: mealType.toLowerCase()
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update the calories displays
+                updateCaloriesDisplay(data.remaining_calories);
+                // Reload the page to update the meal plan display
+                window.location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'Error selecting meal');
+        });
+    }
     </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timedelta
 import pandas as pd
 from functools import wraps
+import json
 
 pymysql.install_as_MySQLdb()
 from models import db, User, Recipe, Admin  # Update this import path if needed
@@ -648,6 +649,16 @@ def dashboard():
             goal_calories = round(maintenance_calories * 1.2)
         else:  # Maintain
             goal_calories = round(maintenance_calories)
+            
+        # Load today's meal history
+        history = load_meal_history()
+        user_id = str(session['user_id'])
+        today = datetime.now().strftime('%Y-%m-%d')
+        today_meals = history.get(user_id, {}).get(today, {}).get('meals', {})
+        
+        # Calculate remaining calories
+        total_calories_consumed = history.get(user_id, {}).get(today, {}).get('total_calories', 0)
+        remaining_calories = goal_calories - total_calories_consumed
         
         # Get meal recommendations and nutrition info
         nutritional_needs = recommender.calculate_nutritional_needs(user)
@@ -673,11 +684,12 @@ def dashboard():
                              user=user,
                              bmi_value=bmi_value,
                              bmi_category=bmi_category,
-                             bmi_calories=bmi_calories,
-                             goal_calories=goal_calories,
+                             bmi_calories=remaining_calories,
+                             goal_calories=remaining_calories,
                              activity_multiplier=activity_multiplier,
                              meal_recommendations=meal_recommendations,
-                             nutrition=nutrition)
+                             nutrition=nutrition,
+                             today_meals=today_meals)
                              
     except Exception as e:
         print(f"Dashboard error: {str(e)}")
@@ -753,6 +765,149 @@ def get_different_meals(meal_type):
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+def load_meal_history():
+    """Load meal history from JSON file"""
+    history_file = 'meal_history.json'
+    if os.path.exists(history_file):
+        with open(history_file, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_meal_history(history):
+    """Save meal history to JSON file"""
+    with open('meal_history.json', 'w') as f:
+        json.dump(history, f, indent=4)
+
+@app.route('/select_meal', methods=['POST'])
+@login_required
+def select_meal():
+    try:
+        data = request.json
+        user_id = str(session['user_id'])
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        # Get user from database to access daily_calorie_goal
+        user = db.session.get(User, session['user_id'])
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+        
+        # Load existing history
+        history = load_meal_history()
+        
+        # Initialize user and date entries if they don't exist
+        if user_id not in history:
+            history[user_id] = {}
+        if today not in history[user_id]:
+            history[user_id][today] = {
+                'meals': {},
+                'total_calories': 0,
+                'remaining_calories': user.daily_calorie_goal if hasattr(user, 'daily_calorie_goal') else 2000
+            }
+        
+        # Verify meal_type is provided and valid
+        if not data.get('meal_type'):
+            return jsonify({
+                'success': False,
+                'message': 'Meal type is required'
+            }), 400
+            
+        meal_type = data['meal_type'].lower()
+        if meal_type not in ['breakfast', 'lunch', 'dinner', 'snack']:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid meal type'
+            }), 400
+        
+        # Check if meal type already selected for today
+        if meal_type in history[user_id][today]['meals']:
+            return jsonify({
+                'success': False,
+                'message': f'You have already selected {meal_type} for today'
+            }), 400
+        
+        # Add new meal
+        history[user_id][today]['meals'][meal_type] = {
+            'recipe_name': data['recipe_name'],
+            'calories': float(data['calories']),
+            'time_selected': datetime.now().strftime('%H:%M:%S')
+        }
+        
+        # Update calories
+        history[user_id][today]['total_calories'] += float(data['calories'])
+        history[user_id][today]['remaining_calories'] -= float(data['calories'])
+        
+        # Save updated history
+        save_meal_history(history)
+        
+        return jsonify({
+            'success': True,
+            'calories_consumed': history[user_id][today]['total_calories'],
+            'remaining_calories': history[user_id][today]['remaining_calories']
+        })
+        
+    except Exception as e:
+        print(f"Error selecting meal: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error selecting meal: {str(e)}'
+        }), 500
+
+@app.route('/meal_history')
+@login_required
+def meal_history():
+    user_id = str(session['user_id'])
+    history = load_meal_history()
+    user_history = history.get(user_id, {})
+    
+    return render_template('meal_history.html', history=user_history)
+
+@app.route('/remove_meal', methods=['POST'])
+@login_required
+def remove_meal():
+    try:
+        data = request.json
+        user_id = str(session['user_id'])
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        # Load existing history
+        history = load_meal_history()
+        
+        # Check if meal exists
+        if (user_id not in history or 
+            today not in history[user_id] or 
+            data['meal_type'] not in history[user_id][today]['meals']):
+            return jsonify({
+                'success': False,
+                'message': 'Meal not found'
+            }), 404
+        
+        # Get calories of meal to be removed
+        meal_calories = history[user_id][today]['meals'][data['meal_type']]['calories']
+        
+        # Remove meal and update calories
+        del history[user_id][today]['meals'][data['meal_type']]
+        history[user_id][today]['total_calories'] -= meal_calories
+        history[user_id][today]['remaining_calories'] += meal_calories
+        
+        # Save updated history
+        save_meal_history(history)
+        
+        return jsonify({
+            'success': True,
+            'calories_consumed': history[user_id][today]['total_calories'],
+            'remaining_calories': history[user_id][today]['remaining_calories']
+        })
+        
+    except Exception as e:
+        print(f"Error removing meal: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error removing meal: {str(e)}'
         }), 500
 
 if __name__ == '__main__':

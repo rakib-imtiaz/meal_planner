@@ -1,0 +1,48 @@
+{
+    "user_id": {
+        "2024-03-14": {
+            "meals": {
+                "breakfast": {
+                    "recipe_name": "Oatmeal",
+                    "calories": 300,
+                    "time_selected": "08:30:45"
+                },
+                "lunch": {
+                    "recipe_name": "Chicken Salad",
+                    "calories": 450,
+                    "time_selected": "12:15:22"
+                }
+            },
+            "total_calories": 750,
+            "remaining_calories": 2250
+        }
+    },
+    "1": {
+        "2024-11-23": {
+            "meals": {
+                "undefined": {
+                    "recipe_name": "Chola Chaat",
+                    "calories": 180,
+                    "time_selected": "07:08:19"
+                },
+                "breakfast": {
+                    "recipe_name": "Chicken Khichuri",
+                    "calories": 860.0,
+                    "time_selected": "07:16:55"
+                },
+                "lunch": {
+                    "recipe_name": "Chicken Khichuri",
+                    "calories": 860.0,
+                    "time_selected": "07:18:40"
+                },
+                "dinner": {
+                    "recipe_name": "Mutton Pulao",
+                    "calories": 906.0,
+                    "time_selected": "07:19:00"
+                }
+            },
+            "total_calories": 2806.0,
+            "remaining_calories": -806.0
+        }
+    }
+}

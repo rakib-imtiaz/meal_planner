@@ -100,7 +100,7 @@
                                 </div>
 
                                 <!-- Add Select Button -->
-                                <button onclick="selectMeal('{{ recipe.name }}', {{ recipe.energy_per_serving_kcal }})"
+                                <button onclick="selectMeal('{{ recipe.name }}', {{ recipe.energy_per_serving_kcal }}, '{{ meal_type }}')"
                                         class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
                                     Select Meal
                                 </button>
@@ -170,41 +170,48 @@
         }
     }
 
-    function selectMeal(name, calories) {
-        // Add meal to selected meals
-        selectedMeals.push({ name, calories });
-        
-        // Update remaining calories
-        remainingCalories = totalDailyCalories - selectedMeals.reduce((sum, meal) => sum + meal.calories, 0);
-        
-        // Update the display
-        updateCalorieDisplay();
-        updateSelectedMealsDisplay();
+    function selectMeal(recipeName, calories, mealType) {
+        fetch('/select_meal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                recipe_name: recipeName,
+                calories: calories,
+                meal_type: mealType
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update remaining calories display
+                document.getElementById('remainingCalories').textContent = 
+                    `Remaining: ${Math.round(data.remaining_calories)} kcal`;
+                
+                // Update available meal types
+                updateAvailableMealTypes(data.remaining_meal_types);
+                
+                // Show success message
+                alert(`Successfully selected ${recipeName} for ${mealType}`);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error selecting meal');
+        });
     }
 
-    function removeMeal(index) {
-        // Add calories back to remaining
-        remainingCalories += selectedMeals[index].calories;
-        
-        // Remove meal from array
-        selectedMeals.splice(index, 1);
-        
-        // Update displays
-        updateCalorieDisplay();
-        updateSelectedMealsDisplay();
-    }
-
-    function updateSelectedMealsDisplay() {
-        const container = document.getElementById('selectedMeals');
-        container.innerHTML = selectedMeals.map((meal, index) => `
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                <span>${meal.name} (${meal.calories} kcal)</span>
-                <button onclick="removeMeal(${index})" 
-                        class="text-red-500 hover:text-red-700">
-                    Remove
-                </button>
-            </div>
-        `).join('');
+    function updateAvailableMealTypes(remainingTypes) {
+        // Hide meal sections that are no longer available
+        document.querySelectorAll('.meal-section').forEach(section => {
+            const mealType = section.getAttribute('data-meal-type');
+            if (!remainingTypes.includes(mealType)) {
+                section.style.display = 'none';
+            }
+        });
     }
 
     function toggleSection(id) {
@@ -272,7 +279,7 @@
                                     </div>
                                 </div>
 
-                                <button onclick="selectMeal('${recipe.name}', ${recipe.energy_per_serving_kcal})"
+                                <button onclick="selectMeal('${recipe.name}', ${recipe.energy_per_serving_kcal}, '${recipe.meal_type}')"
                                         class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors mb-4">
                                     Select Meal
                                 </button>
