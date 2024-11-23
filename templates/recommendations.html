@@ -185,15 +185,11 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Update remaining calories display
-                document.getElementById('remainingCalories').textContent = 
-                    `Remaining: ${Math.round(data.remaining_calories)} kcal`;
-                
-                // Update available meal types
-                updateAvailableMealTypes(data.remaining_meal_types);
-                
                 // Show success message
                 alert(`Successfully selected ${recipeName} for ${mealType}`);
+                
+                // Redirect to dashboard
+                window.location.href = '/dashboard';
             } else {
                 alert(data.message);
             }
@@ -240,12 +236,16 @@
         fetch(`/get_different_meals/${mealType}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to load meals');
+                    });
                 }
                 return response.json();
             })
             .then(data => {
-                if (data.success && data.meals) {
+                console.log('Received data:', data); // Debug log
+                
+                if (data.success && data.meals && data.meals.length > 0) {
                     container.innerHTML = data.meals.map(recipe => `
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                             ${recipe.image ? 
@@ -285,12 +285,12 @@
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = '<div class="col-span-full text-center text-red-500">No alternative meals available</div>';
+                    container.innerHTML = '<div class="col-span-full text-center text-red-500">No meals available for your preferences</div>';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                container.innerHTML = '<div class="col-span-full text-center text-red-500">Error loading meals. Please try again.</div>';
+                container.innerHTML = `<div class="col-span-full text-center text-red-500">Error: ${error.message}</div>`;
             });
     }
 

@@ -33,6 +33,12 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    @property
+    def dietary_preference(self):
+        """Get the user's dietary preference"""
+        pref = self.dietary_preferences.first()
+        return pref.preference if pref else 'non-vegetarian'  # default to non-vegetarian
+
 # Recipe Model
 class Recipe(db.Model):
     __tablename__ = 'recipe'

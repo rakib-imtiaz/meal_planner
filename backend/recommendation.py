@@ -1,3 +1,4 @@
+import traceback
 from models import Recipe, User
 import pandas as pd
 import numpy as np
@@ -69,25 +70,75 @@ class DietRecommender:
     def recommend_meals(self, user, meal_type):
         try:
             nutritional_needs = self.calculate_nutritional_needs(user)
+            
+            # Fix the meal type for snacks
+            if meal_type.lower() == 'snack':
+                meal_type = 'snacks'
+            
             meal_calories = self.get_meal_distribution(nutritional_needs['calories'])[meal_type.lower()]
             
-            # Query recipes
-            query = Recipe.query.filter(
-                and_(
-                    Recipe.is_snack == True if meal_type.lower() == 'snacks' else 
-                    getattr(Recipe, f'is_{meal_type.lower().rstrip("s")}') == True,
-                    Recipe.energy_per_serving_kcal.between(meal_calories * 0.8, meal_calories * 1.2)
-                )
-            )
+            # Print debug information
+            print(f"Searching for {meal_type} recipes")
+            dietary_pref = getattr(user, 'dietary_preference', 'non-vegetarian')
+            print(f"User dietary preference: {dietary_pref}")
             
-            if user.dietary_preference == 'vegetarian':
-                query = query.filter(Recipe.is_vegetarian == True)
+            # Base query with meal type and calorie range
+            base_conditions = [
+                Recipe.energy_per_serving_kcal.between(meal_calories * 0.8, meal_calories * 1.2)
+            ]
+            
+            # Add meal type condition
+            if meal_type.lower() == 'snacks':
+                base_conditions.append(Recipe.is_snack == True)
+            else:
+                base_conditions.append(getattr(Recipe, f'is_{meal_type.lower().rstrip("s")}') == True)
+            
+            # Build initial query
+            query = Recipe.query
+            
+            # Handle dietary preferences with wider calorie range for vegetarian options
+            if dietary_pref == 'vegetarian':
+                # Widen the calorie range for vegetarian options
+                query = query.filter(
+                    and_(
+                        Recipe.is_vegetarian == True,
+                        *base_conditions
+                    )
+                )
                 
-            potential_recipes = query.all()
+                # If no vegetarian options found, try with a wider calorie range
+                potential_recipes = query.all()
+                if not potential_recipes:
+                    print("No vegetarian recipes found with strict calorie range, widening search...")
+                    base_conditions = [
+                        Recipe.energy_per_serving_kcal.between(meal_calories * 0.6, meal_calories * 1.4)
+                    ]
+                    if meal_type.lower() == 'snacks':
+                        base_conditions.append(Recipe.is_snack == True)
+                    else:
+                        base_conditions.append(getattr(Recipe, f'is_{meal_type.lower().rstrip("s")}') == True)
+                    
+                    query = Recipe.query.filter(
+                        and_(
+                            Recipe.is_vegetarian == True,
+                            *base_conditions
+                        )
+                    )
+                    potential_recipes = query.all()
+            else:
+                # For non-vegetarian users, use original conditions
+                query = query.filter(and_(*base_conditions))
+                potential_recipes = query.all()
+            
+            # Debug print statements
+            print(f"Found {len(potential_recipes)} potential recipes")
+            for recipe in potential_recipes:
+                print(f"Recipe: {recipe.name}, Vegetarian: {recipe.is_vegetarian}, Meal Type: {meal_type}, Calories: {recipe.energy_per_serving_kcal}")
             
             if not potential_recipes:
+                print(f"No recipes found for {meal_type}")
                 return []
-                
+                    
             # Convert to DataFrame for processing
             recipe_data = pd.DataFrame([{
                 'id': recipe.id,
@@ -108,7 +159,6 @@ class DietRecommender:
                 'fiber_per_serving_g': nutritional_needs['fiber'] * 0.25
             })
             
-            # Calculate weighted scores
             differences = np.abs(recipe_data[target_nutrition.index] - target_nutrition)
             weights = pd.Series({
                 'energy_per_serving_kcal': 0.4,
@@ -119,8 +169,6 @@ class DietRecommender:
             })
             
             weighted_scores = (differences * weights).sum(axis=1)
-            
-            # Get top 3 recommendations
             recommended_ids = recipe_data.loc[weighted_scores.nsmallest(3).index, 'id']
             final_recipes = Recipe.query.filter(Recipe.id.in_(recommended_ids)).all()
             
@@ -128,5 +176,6 @@ class DietRecommender:
             
         except Exception as e:
             print(f"Error in recommend_meals: {str(e)}")
+            traceback.print_exc()  # Add this to get full error traceback
             return []
 

@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from functools import wraps
 import json
+import traceback
 
 pymysql.install_as_MySQLdb()
 from models import db, User, Recipe, Admin  # Update this import path if needed
@@ -251,7 +252,7 @@ def calculate_diet():
         'breakfast': recommender.recommend_meals(user, 'breakfast'),
         'lunch': recommender.recommend_meals(user, 'lunch'),
         'dinner': recommender.recommend_meals(user, 'dinner'),
-        'snacks': recommender.recommend_meals(user, 'snack')
+        'snacks': recommender.recommend_meals(user, 'snacks')
     }
     
     return jsonify({
@@ -506,6 +507,9 @@ def generate_meal_plan():
         # Create user object from form data
         user = TempUser(request.form)
         
+        # Store the current meal plan's dietary preference in session
+        session['current_meal_plan_preference'] = user.dietary_preference
+        
         # Get selected meal type
         meal_type = request.form.get('meal_type')
         
@@ -728,51 +732,73 @@ def inject_now():
 def browse_recipes():
     recipes = Recipe.query.all()
     return render_template('view_recipes.html', recipes=recipes)
-
 @app.route('/get_different_meals/<meal_type>')
 @login_required
 def get_different_meals(meal_type):
     try:
         user = db.session.get(User, session['user_id'])
-        recommender = DietRecommender()
         
-        print(f"Fetching new meals for type: {meal_type}")
+        # Use the dietary preference from the current meal plan instead of user's default
+        current_pref = session.get('current_meal_plan_preference', user.dietary_preference)
         
-        # Query recipes directly based on meal type
-        meal_type_column = {
-            'breakfast': Recipe.is_breakfast,
-            'lunch': Recipe.is_lunch,
-            'dinner': Recipe.is_dinner,
-            'snack': Recipe.is_snack
-        }.get(meal_type.lower())
+        # Debug prints
+        print(f"User ID: {user.id}")
+        print(f"Meal Type: {meal_type}")
+        print(f"Current Meal Plan Preference: {current_pref}")  # Updated debug print
         
-        if not meal_type_column:
-            return jsonify({
-                'success': False,
-                'error': f'Invalid meal type: {meal_type}'
-            }), 400
+        # Normalize meal type
+        meal_type = meal_type.lower()
+        if meal_type == 'snack':
+            meal_type = 'snacks'
         
-        # Get 3 random recipes for the specified meal type
-        new_meals = Recipe.query.filter(meal_type_column == True).order_by(db.func.random()).limit(3).all()
+        # Build the query
+        query = Recipe.query
+        
+        # Add meal type filter
+        if meal_type == 'snacks':
+            query = query.filter(Recipe.is_snack == True)
+        else:
+            query = query.filter(getattr(Recipe, f'is_{meal_type}') == True)
+        
+        # Add dietary preference filter based on session preference
+        if current_pref == 'vegetarian':
+            query = query.filter(Recipe.is_vegetarian == True)
+        
+        # Get random recipes
+        new_meals = query.order_by(db.func.random()).limit(3).all()
+        
+        # Debug print
+        print(f"Found {len(new_meals)} meals")
+        for meal in new_meals:
+            print(f"- {meal.name} (Vegetarian: {meal.is_vegetarian})")
         
         if not new_meals:
+            print("No meals found matching criteria")
             return jsonify({
                 'success': False,
-                'error': f'No meals found for type: {meal_type}'
+                'error': 'No meals found matching the criteria'
             }), 404
         
-        # Format meals with all necessary information including ID
-        formatted_meals = [{
-            'id': recipe.id,  # Make sure to include the ID
-            'name': recipe.name,
-            'image': recipe.image,
-            'energy_per_serving_kcal': recipe.energy_per_serving_kcal,
-            'protein_per_serving_g': recipe.protein_per_serving_g,
-            'carbohydrate_per_serving_g': recipe.carbohydrate_per_serving_g,
-            'fat_per_serving_g': recipe.fat_per_serving_g,
-            'serving_size': recipe.serving_size,
-            'meal_type': meal_type  # Include the meal type
-        } for recipe in new_meals]
+        # Format the response
+        formatted_meals = []
+        for recipe in new_meals:
+            try:
+                formatted_meal = {
+                    'id': recipe.id,
+                    'name': recipe.name,
+                    'image': recipe.image or '',
+                    'energy_per_serving_kcal': float(recipe.energy_per_serving_kcal or 0),
+                    'protein_per_serving_g': float(recipe.protein_per_serving_g or 0),
+                    'carbohydrate_per_serving_g': float(recipe.carbohydrate_per_serving_g or 0),
+                    'fat_per_serving_g': float(recipe.fat_per_serving_g or 0),
+                    'serving_size': int(recipe.serving_size or 1),
+                    'meal_type': meal_type,
+                    'is_vegetarian': recipe.is_vegetarian
+                }
+                formatted_meals.append(formatted_meal)
+            except Exception as format_error:
+                print(f"Error formatting meal {recipe.name}: {str(format_error)}")
+                continue
         
         return jsonify({
             'success': True,
@@ -780,7 +806,8 @@ def get_different_meals(meal_type):
         })
         
     except Exception as e:
-        print(f"Error getting different meals: {str(e)}")
+        print(f"Error in get_different_meals: {str(e)}")
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)
