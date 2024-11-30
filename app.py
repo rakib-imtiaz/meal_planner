@@ -14,7 +14,7 @@ import json
 import traceback
 
 pymysql.install_as_MySQLdb()
-from models import db, User, Recipe, Admin  # Update this import path if needed
+from models import db, User, Recipe, Admin, UserDietaryPreference  # Add UserDietaryPreference
 from backend.recommendation import DietRecommender
 
 app = Flask(__name__)
@@ -628,7 +628,26 @@ def dashboard():
         return redirect(url_for('edit_profile'))
     
     try:
+        user = db.session.get(User, session['user_id'])
         recommender = DietRecommender()
+        
+        # Get preference from session or user default
+        preference = session.get('current_meal_plan_preference') or user.dietary_preference
+        
+        # Build the base query for recipes
+        base_query = Recipe.query
+        
+        # Add dietary preference filter
+        if preference == 'vegetarian':
+            base_query = base_query.filter(Recipe.is_vegetarian == True)
+        
+        # Get meal recommendations with dietary preference filter
+        meal_recommendations = {
+            'breakfast': base_query.filter(Recipe.is_breakfast == True).order_by(db.func.random()).first(),
+            'lunch': base_query.filter(Recipe.is_lunch == True).order_by(db.func.random()).first(),
+            'dinner': base_query.filter(Recipe.is_dinner == True).order_by(db.func.random()).first(),
+            'snack': base_query.filter(Recipe.is_snack == True).order_by(db.func.random()).first()
+        }
         
         # Define activity level multipliers
         activity_multipliers = {
@@ -689,12 +708,6 @@ def dashboard():
         
         # Get meal recommendations and nutrition info
         nutritional_needs = recommender.calculate_nutritional_needs(user)
-        meal_recommendations = {
-            'breakfast': recommender.recommend_meals(user, 'breakfast')[0] if recommender.recommend_meals(user, 'breakfast') else None,
-            'lunch': recommender.recommend_meals(user, 'lunch')[0] if recommender.recommend_meals(user, 'lunch') else None,
-            'dinner': recommender.recommend_meals(user, 'dinner')[0] if recommender.recommend_meals(user, 'dinner') else None,
-            'snack': recommender.recommend_meals(user, 'snack')[0] if recommender.recommend_meals(user, 'snack') else None
-        }
         
         # Calculate nutrition percentages
         total_calories = nutritional_needs.get('calories', 2000)
@@ -738,13 +751,13 @@ def get_different_meals(meal_type):
     try:
         user = db.session.get(User, session['user_id'])
         
-        # Use the dietary preference from the current meal plan instead of user's default
-        current_pref = session.get('current_meal_plan_preference', user.dietary_preference)
+        # Get preference from query parameter or fall back to session/user preference
+        preference = request.args.get('preference') or session.get('current_meal_plan_preference') or user.dietary_preference
         
         # Debug prints
         print(f"User ID: {user.id}")
         print(f"Meal Type: {meal_type}")
-        print(f"Current Meal Plan Preference: {current_pref}")  # Updated debug print
+        print(f"Dietary Preference: {preference}")
         
         # Normalize meal type
         meal_type = meal_type.lower()
@@ -760,8 +773,8 @@ def get_different_meals(meal_type):
         else:
             query = query.filter(getattr(Recipe, f'is_{meal_type}') == True)
         
-        # Add dietary preference filter based on session preference
-        if current_pref == 'vegetarian':
+        # Add dietary preference filter
+        if preference == 'vegetarian':
             query = query.filter(Recipe.is_vegetarian == True)
         
         # Get random recipes
@@ -958,6 +971,51 @@ def remove_meal():
         return jsonify({
             'success': False,
             'message': f'Error removing meal: {str(e)}'
+        }), 500
+
+@app.route('/update_preference', methods=['POST'])
+@login_required
+def update_preference():
+    try:
+        data = request.json
+        preference = data.get('dietary_preference')
+        
+        print(f"Updating preference to: {preference}")  # Debug log
+        
+        # Update session preference immediately
+        session['current_meal_plan_preference'] = preference
+        
+        # Update user preference in database
+        user = User.query.get(session['user_id'])
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+            
+        # Get or create dietary preference
+        dietary_pref = UserDietaryPreference.query.filter_by(user_id=user.id).first()
+        if not dietary_pref:
+            dietary_pref = UserDietaryPreference(user_id=user.id)
+            db.session.add(dietary_pref)
+        
+        dietary_pref.preference = preference
+        db.session.commit()
+        
+        print(f"Preference updated successfully for user {user.id}")  # Debug log
+        
+        return jsonify({
+            'success': True,
+            'message': 'Preference updated successfully'
+        })
+        
+    except Exception as e:
+        print(f"Error updating preference: {str(e)}")  # Debug log
+        traceback.print_exc()  # Print full traceback for debugging
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': str(e)
         }), 500
 
 if __name__ == '__main__':

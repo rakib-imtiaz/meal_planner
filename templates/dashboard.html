@@ -26,6 +26,29 @@
             <p class="text-lg opacity-90">Let's plan your healthy meals for today.</p>
         </div>
 
+        <!-- Add this after the Welcome Section and before Quick Stats -->
+        <div class="flex justify-end mb-4 items-center space-x-3">
+            <span class="text-gray-600 font-medium">Non-Veg</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" 
+                       id="dietaryPreference" 
+                       class="sr-only peer" 
+                       onchange="updateDietaryPreference(this.checked)"
+                       {% if user.dietary_preference == 'vegetarian' %}checked{% endif %}>
+                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                            peer-focus:ring-green-300 rounded-full peer 
+                            peer-checked:after:translate-x-full peer-checked:after:border-white 
+                            after:content-[''] after:absolute after:top-0.5 after:left-[4px] 
+                            after:bg-white after:border-gray-300 after:border after:rounded-full 
+                            after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500
+                            after:flex after:items-center after:justify-center
+                            after:text-xs after:font-bold after:text-gray-400
+                            peer-checked:after:content-['🥕'] after:content-['🍖']">
+                </div>
+            </label>
+            <span class="text-gray-600 font-medium">Veg</span>
+        </div>
+
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Current Weight Card -->
@@ -295,6 +318,111 @@
             alert(error.message || 'Error selecting meal');
         });
     }
+
+    function updateDietaryPreference(isVegetarian) {
+        const preference = isVegetarian ? 'vegetarian' : 'non-vegetarian';
+        
+        // Show loading state
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        loadingOverlay.innerHTML = `
+            <div class="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
+                <span class="text-gray-700">Updating preferences...</span>
+            </div>
+        `;
+        document.body.appendChild(loadingOverlay);
+
+        // Add timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+            loadingOverlay.remove();
+            alert('Update took too long. Please try again.');
+        }, 5000); // 5 second timeout
+
+        // Store preference in session
+        fetch('/update_preference', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                dietary_preference: preference
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            clearTimeout(timeoutId); // Clear timeout on success
+            if (data.success) {
+                // Add a smooth fade out effect before reload
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.15s ease-out';
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 150);
+            } else {
+                throw new Error(data.message || 'Update failed');
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId); // Clear timeout on error
+            console.error('Error:', error);
+            loadingOverlay.remove();
+            alert(`Error updating preference: ${error.message}`);
+            // Reset the toggle to its previous state
+            const toggle = document.getElementById('dietaryPreference');
+            if (toggle) {
+                toggle.checked = !toggle.checked;
+            }
+        });
+    }
+
+    // Add this function to handle page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Remove any stray loading overlays that might have persisted
+        const existingOverlays = document.querySelectorAll('.fixed.inset-0.bg-black.bg-opacity-50');
+        existingOverlays.forEach(overlay => overlay.remove());
+    });
+
+    // Update the CSS animations to be faster
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            /* Smooth page transitions */
+            body {
+                opacity: 1;
+                transition: opacity 0.15s ease-in;
+            }
+            
+            /* Loading spinner animation */
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            
+            /* Toggle switch animations */
+            .peer:checked ~ .peer-checked\:after\:translate-x-full {
+                transition: transform 0.15s ease-in-out;
+            }
+            
+            /* Emoji animations */
+            .after\:content-\[\'🍖\'\]:hover,
+            .peer-checked\:after\:content-\[\'🥕\'\]:hover {
+                transform: scale(1.1);
+                transition: transform 0.15s ease-in-out;
+            }
+            
+            /* Add preload for spinner animation */
+            .animate-spin {
+                animation: spin 0.6s linear infinite;
+            }
+        </style>
+    `);
     </script>
 </body>
 </html>

@@ -95,7 +95,7 @@ CREATE TABLE admins (
 );
 
 -- Insert default admin (plain password)
-INSERT INTO admins (username, password) VALUES ('admin', 'admin123');
+INSERT INTO admins (username, password) VALUES ('admin', 'admin');
 
 -- User nutrition table
 CREATE TABLE user_nutrition (
