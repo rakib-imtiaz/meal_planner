@@ -152,20 +152,43 @@ def signup():
     if request.method == 'GET':
         return render_template('signup.html')
     elif request.method == 'POST':
-        data = request.form
-        hashed_password = generate_password_hash(data['password'])
-        new_user = User(username=data['username'], email=data['email'], password_hash=hashed_password)
         try:
+            data = request.form
+            hashed_password = generate_password_hash(data['password'])
+            new_user = User(
+                username=data['username'],
+                email=data['email'],
+                password_hash=hashed_password,
+                # Initialize with default values
+                name=data['username'],  # Use username as initial name
+                age=0,
+                sex='male',
+                weight=0,
+                height=0,
+                activity_level='moderate',
+                goal='maintain',
+                dietary_restrictions=''
+            )
             db.session.add(new_user)
             db.session.commit()
+            
+            # Set session variables
             session['user_id'] = new_user.id
             session['logged_in'] = True
             session['username'] = new_user.username
             session['is_admin'] = False
-            return redirect(url_for('dashboard'))
+            
+            # Redirect to edit profile to complete setup
+            flash('Please complete your profile information', 'info')
+            return redirect(url_for('edit_profile'))
+            
         except IntegrityError:
             db.session.rollback()
             flash('Username or email already exists', 'error')
+            return redirect(url_for('signup'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating account: {str(e)}', 'error')
             return redirect(url_for('signup'))
 
 @app.route('/admin/login', methods=['GET'])

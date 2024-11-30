@@ -24,6 +24,9 @@
             <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Edit Profile</h1>
 
             <form method="POST" action="{{ url_for('edit_profile') }}">
+                <!-- Add this hidden input field for height -->
+                <input type="hidden" id="height" name="height" value="{{ user.height }}">
+                
                 <!-- Personal Information -->
                 <div class="space-y-4">
                     <div>
