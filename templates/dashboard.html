@@ -26,29 +26,6 @@
             <p class="text-lg opacity-90">Let's plan your healthy meals for today.</p>
         </div>
 
-        <!-- Add this after the Welcome Section and before Quick Stats -->
-        <div class="flex justify-end mb-4 items-center space-x-3">
-            <span class="text-gray-600 dark:text-gray-300 font-medium">Non-Veg</span>
-            <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" 
-                       id="dietaryPreference" 
-                       class="sr-only peer" 
-                       onchange="updateDietaryPreference(this.checked)"
-                       {% if user.dietary_preference == 'vegetarian' %}checked{% endif %}>
-                <div class="w-14 h-7 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 
-                            peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer 
-                            peer-checked:after:translate-x-full peer-checked:after:border-white 
-                            after:content-[''] after:absolute after:top-0.5 after:left-[4px] 
-                            after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full 
-                            after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500
-                            after:flex after:items-center after:justify-center
-                            after:text-xs after:font-bold after:text-gray-400
-                            peer-checked:after:content-['🥕'] after:content-['🍖']">
-                </div>
-            </label>
-            <span class="text-gray-600 dark:text-gray-300 font-medium">Veg</span>
-        </div>
-
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Current Weight Card -->

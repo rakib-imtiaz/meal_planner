@@ -35,5 +35,12 @@
             "total_calories": 0.0,
             "remaining_calories": 2000.0
         }
+    },
+    "5": {
+        "2024-11-30": {
+            "meals": {},
+            "total_calories": 0.0,
+            "remaining_calories": 2000.0
+        }
     }
 }

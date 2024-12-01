@@ -603,9 +603,10 @@ def edit_profile():
             user.sex = request.form.get('sex')
             user.weight = float(request.form.get('weight', 0))
             user.height = float(request.form.get('height', 0))
-            user.activity_level = request.form.get('activity_level')  # This should match the select options
+            user.activity_level = request.form.get('activity_level')
             user.goal = request.form.get('goal')
-            user.dietary_restrictions = request.form.get('dietary_restrictions', '')
+            # Add vegetarian preference
+            user.is_vegetarian = request.form.get('is_vegetarian') == 'true'
             
             # Validate required fields
             if not all([user.name, user.age, user.sex, user.weight, user.height, user.activity_level, user.goal]):
