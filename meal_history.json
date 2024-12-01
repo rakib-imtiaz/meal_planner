@@ -29,6 +29,11 @@
             },
             "total_calories": 3260.0,
             "remaining_calories": -1260.0
+        },
+        "2024-12-01": {
+            "meals": {},
+            "total_calories": 0.0,
+            "remaining_calories": 2000.0
         }
     }
 }
