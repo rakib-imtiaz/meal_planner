@@ -663,13 +663,7 @@ def dashboard():
             base_query = base_query.filter(Recipe.is_vegetarian == True)
         
         # Get meal recommendations with dietary preference filter
-        meal_recommendations = {
-            'breakfast': base_query.filter(Recipe.is_breakfast == True).order_by(db.func.random()).first(),
-            'lunch': base_query.filter(Recipe.is_lunch == True).order_by(db.func.random()).first(),
-            'dinner': base_query.filter(Recipe.is_dinner == True).order_by(db.func.random()).first(),
-            'snack': base_query.filter(Recipe.is_snack == True).order_by(db.func.random()).first()
-        }
-        
+      
         # Define activity level multipliers
         activity_multipliers = {
             'sedentary': 1.2,      # Little or no exercise
@@ -713,9 +707,61 @@ def dashboard():
             goal_calories = round(maintenance_calories)
 
 
+
+        
+
+
         print(f"Goal calories: {goal_calories}")
         print(f"BMI calories: {bmi_calories}")
+
+        # Calculate target calories for each meal type
+        meal_calories_target = {
+            'breakfast': goal_calories * 0.25,  # 25% of daily calories
+            'lunch': goal_calories * 0.35,      # 35% of daily calories
+            'dinner': goal_calories * 0.30,     # 30% of daily calories
+            'snack': goal_calories * 0.10       # 10% of daily calories
+        }
+
+        # Define acceptable calorie range (±20% of target)
+        def get_calorie_range(target_calories):
+            return (target_calories * 0.8, target_calories * 1.2)
+
+        # Get user's dietary preference
+        preference = session.get('current_meal_plan_preference') or user.dietary_preference
+
+        meal_recommendations = {}
+        for meal_type in ['breakfast', 'lunch', 'dinner', 'snack']:
+            target_calories = meal_calories_target[meal_type]
+            min_calories, max_calories = get_calorie_range(target_calories)
             
+            # Build query with dietary preference
+            query = base_query
+            if preference == 'vegetarian':
+                query = query.filter(Recipe.is_vegetarian == True)
+            
+            # Query recipes within the calorie range for the meal type
+            meal_recommendations[meal_type] = (
+                query
+                .filter(
+                    getattr(Recipe, f'is_{meal_type}') == True,
+                    Recipe.energy_per_serving_kcal >= min_calories,
+                    Recipe.energy_per_serving_kcal <= max_calories
+                )
+                .order_by(db.func.random())
+                .first()
+            )
+            
+            # Fallback if no recipe found within range
+            if meal_recommendations[meal_type] is None:
+                meal_recommendations[meal_type] = (
+                    query
+                    .filter(getattr(Recipe, f'is_{meal_type}') == True)
+                    .order_by(
+                        db.func.abs(Recipe.energy_per_serving_kcal - target_calories)
+                    )
+                    .first()
+                )
+
         # Load today's meal history
         history = load_meal_history()
         user_id = str(session['user_id'])
