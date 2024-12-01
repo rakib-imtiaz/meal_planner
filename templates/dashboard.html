@@ -16,7 +16,7 @@
         }
     </script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 dark:bg-gray-900">
     {% include 'header.html' %}
 
     <main class="container mx-auto px-4 py-8">
@@ -28,80 +28,80 @@
 
         <!-- Add this after the Welcome Section and before Quick Stats -->
         <div class="flex justify-end mb-4 items-center space-x-3">
-            <span class="text-gray-600 font-medium">Non-Veg</span>
+            <span class="text-gray-600 dark:text-gray-300 font-medium">Non-Veg</span>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" 
                        id="dietaryPreference" 
                        class="sr-only peer" 
                        onchange="updateDietaryPreference(this.checked)"
                        {% if user.dietary_preference == 'vegetarian' %}checked{% endif %}>
-                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
-                            peer-focus:ring-green-300 rounded-full peer 
+                <div class="w-14 h-7 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 
+                            peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer 
                             peer-checked:after:translate-x-full peer-checked:after:border-white 
                             after:content-[''] after:absolute after:top-0.5 after:left-[4px] 
-                            after:bg-white after:border-gray-300 after:border after:rounded-full 
+                            after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full 
                             after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500
                             after:flex after:items-center after:justify-center
                             after:text-xs after:font-bold after:text-gray-400
                             peer-checked:after:content-['🥕'] after:content-['🍖']">
                 </div>
             </label>
-            <span class="text-gray-600 font-medium">Veg</span>
+            <span class="text-gray-600 dark:text-gray-300 font-medium">Veg</span>
         </div>
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Current Weight Card -->
-            <div class="bg-white p-4 rounded-lg shadow-md">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-weight text-blue-500"></i>
+                    <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                        <i class="fas fa-weight text-blue-500 dark:text-blue-400"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500">Current Weight</p>
-                        <p class="text-xl font-bold">{{ user.weight }} kg</p>
+                        <p class="text-gray-500 dark:text-gray-400">Current Weight</p>
+                        <p class="text-xl font-bold dark:text-white">{{ user.weight }} kg</p>
                     </div>
                 </div>
             </div>
 
             <!-- BMI-Based Calories Card -->
-            <div class="bg-white p-4 rounded-lg shadow-md">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-purple-100 p-3 rounded-full">
-                        <i class="fas fa-calculator text-purple-500"></i>
+                    <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
+                        <i class="fas fa-calculator text-purple-500 dark:text-purple-400"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500">BMI-Based Calories</p>
-                        <p id="bmiCalories" class="text-xl font-bold">{{ bmi_calories }} kcal</p>
-                        <p class="text-sm text-gray-500">BMI: {{ "%.1f"|format(bmi_value) }} ({{ bmi_category }})</p>
+                        <p class="text-gray-500 dark:text-gray-400">BMI-Based Calories</p>
+                        <p id="bmiCalories" class="text-xl font-bold dark:text-white">{{ bmi_calories }} kcal</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">BMI: {{ "%.1f"|format(bmi_value) }} ({{ bmi_category }})</p>
                     </div>
                 </div>
             </div>
 
             <!-- Goal-Based Calories Card -->
-            <div class="bg-white p-4 rounded-lg shadow-md">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-green-100 p-3 rounded-full">
-                        <i class="fas fa-bullseye text-green-500"></i>
+                    <div class="bg-green-100 dark:bg-green-900 p-3 rounded-full">
+                        <i class="fas fa-bullseye text-green-500 dark:text-green-400"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500">Goal-Based Calories</p>
-                        <p id="goalCalories" class="text-xl font-bold">{{ goal_calories }} kcal</p>
-                        <p class="text-sm text-gray-500">Goal: {{ user.goal }}</p>
+                        <p class="text-gray-500 dark:text-gray-400">Goal-Based Calories</p>
+                        <p id="goalCalories" class="text-xl font-bold dark:text-white">{{ goal_calories }} kcal</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Goal: {{ user.goal }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Activity Level Card -->
-            <div class="bg-white p-4 rounded-lg shadow-md">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-orange-100 p-3 rounded-full">
-                        <i class="fas fa-running text-orange-500"></i>
+                    <div class="bg-orange-100 dark:bg-orange-900 p-3 rounded-full">
+                        <i class="fas fa-running text-orange-500 dark:text-orange-400"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500">Activity Level</p>
-                        <p class="text-xl font-bold capitalize">{{ user.activity_level }}</p>
-                        <p class="text-sm text-gray-500">Multiplier: {{ activity_multiplier }}x</p>
+                        <p class="text-gray-500 dark:text-gray-400">Activity Level</p>
+                        <p class="text-xl font-bold dark:text-white capitalize">{{ user.activity_level }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Multiplier: {{ activity_multiplier }}x</p>
                     </div>
                 </div>
             </div>
@@ -110,26 +110,26 @@
         <!-- Meal Plan Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Today's Meal Plan -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4">Today's Meal Plan</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 dark:text-white">Today's Meal Plan</h2>
                 <div class="space-y-4">
                     {% for meal_type in ['breakfast', 'lunch', 'dinner', 'snack'] %}
-                    <div class="border-b pb-4 last:border-b-0">
-                        <h3 class="text-lg font-semibold capitalize mb-2">{{ meal_type }}</h3>
+                    <div class="border-b dark:border-gray-700 pb-4 last:border-b-0">
+                        <h3 class="text-lg font-semibold capitalize mb-2 dark:text-white">{{ meal_type }}</h3>
                         {% if today_meals.get(meal_type) %}
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-utensils text-2xl text-gray-500"></i>
+                                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-utensils text-2xl text-gray-500 dark:text-gray-400"></i>
                                     </div>
                                     <div>
-                                        <p class="font-medium">{{ today_meals[meal_type].recipe_name }}</p>
-                                        <p class="text-sm text-gray-500">{{ today_meals[meal_type].calories }} kcal</p>
-                                        <p class="text-xs text-gray-400">Selected at: {{ today_meals[meal_type].time_selected }}</p>
+                                        <p class="font-medium dark:text-white">{{ today_meals[meal_type].recipe_name }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ today_meals[meal_type].calories }} kcal</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500">Selected at: {{ today_meals[meal_type].time_selected }}</p>
                                     </div>
                                 </div>
                                 <button onclick="removeMeal('{{ meal_type }}')"
-                                        class="text-red-500 hover:text-red-600 focus:outline-none">
+                                        class="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 focus:outline-none">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -170,34 +170,34 @@
             </div>
 
             <!-- Nutrition Overview -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4">Nutrition Overview</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 dark:text-white">Nutrition Overview</h2>
                 <div class="space-y-4">
                     <div class="relative pt-1">
-                        <p class="text-sm font-medium">Proteins</p>
+                        <p class="text-sm font-medium dark:text-white">Proteins</p>
                         <div class="flex items-center justify-between">
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                                 <div class="bg-blue-500 h-2.5 rounded-full" style="width:{{ nutrition.protein_percentage }}%"></div>
                             </div>
-                            <span class="ml-4 text-sm">{{ nutrition.protein }}g</span>
+                            <span class="ml-4 text-sm dark:text-gray-300">{{ nutrition.protein }}g</span>
                         </div>
                     </div>
                     <div class="relative pt-1">
-                        <p class="text-sm font-medium">Carbs</p>
+                        <p class="text-sm font-medium dark:text-white">Carbs</p>
                         <div class="flex items-center justify-between">
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                                 <div class="bg-green-500 h-2.5 rounded-full" style="width:{{ nutrition.carbs_percentage }}%"></div>
                             </div>
-                            <span class="ml-4 text-sm">{{ nutrition.carbs }}g</span>
+                            <span class="ml-4 text-sm dark:text-gray-300">{{ nutrition.carbs }}g</span>
                         </div>
                     </div>
                     <div class="relative pt-1">
-                        <p class="text-sm font-medium">Fats</p>
+                        <p class="text-sm font-medium dark:text-white">Fats</p>
                         <div class="flex items-center justify-between">
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                                 <div class="bg-yellow-500 h-2.5 rounded-full" style="width:{{ nutrition.fats_percentage }}%"></div>
                             </div>
-                            <span class="ml-4 text-sm">{{ nutrition.fats }}g</span>
+                            <span class="ml-4 text-sm dark:text-gray-300">{{ nutrition.fats }}g</span>
                         </div>
                     </div>
                 </div>
@@ -207,21 +207,21 @@
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <a href="{{ url_for('edit_profile') }}" 
-               class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <i class="fas fa-user-edit text-2xl text-green-500 mb-3"></i>
-                <h3 class="text-lg font-semibold mb-2">Update Profile</h3>
-                <p class="text-gray-600">Keep your information up to date for better recommendations.</p>
+               class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <i class="fas fa-user-edit text-2xl text-green-500 dark:text-green-400 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2 dark:text-white">Update Profile</h3>
+                <p class="text-gray-600 dark:text-gray-400">Keep your information up to date for better recommendations.</p>
             </a>
             <a href="{{ url_for('browse_recipes') }}" 
-               class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <i class="fas fa-utensils text-2xl text-green-500 mb-3"></i>
-                <h3 class="text-lg font-semibold mb-2">Browse Recipes</h3>
-                <p class="text-gray-600">Explore our collection of healthy and delicious recipes.</p>
+               class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <i class="fas fa-utensils text-2xl text-green-500 dark:text-green-400 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2 dark:text-white">Browse Recipes</h3>
+                <p class="text-gray-600 dark:text-gray-400">Explore our collection of healthy and delicious recipes.</p>
             </a>
-            <a href="#" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <i class="fas fa-chart-line text-2xl text-green-500 mb-3"></i>
-                <h3 class="text-lg font-semibold mb-2">Track Progress</h3>
-                <p class="text-gray-600">Monitor your journey towards your health goals.</p>
+            <a href="#" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <i class="fas fa-chart-line text-2xl text-green-500 dark:text-green-400 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2 dark:text-white">Track Progress</h3>
+                <p class="text-gray-600 dark:text-gray-400">Monitor your journey towards your health goals.</p>
             </a>
         </div>
     </main>
@@ -345,9 +345,9 @@
         const loadingOverlay = document.createElement('div');
         loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
         loadingOverlay.innerHTML = `
-            <div class="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg flex items-center space-x-3">
                 <div class="animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
-                <span class="text-gray-700">Updating preferences...</span>
+                <span class="text-gray-700 dark:text-gray-300">Updating preferences...</span>
             </div>
         `;
         document.body.appendChild(loadingOverlay);
@@ -447,16 +447,16 @@
     <!-- Add this success animation template at the end of body but before scripts -->
     <template id="success-animation">
         <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-            <div class="bg-white rounded-lg p-6 transform scale-0 transition-transform duration-300">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 transform scale-0 transition-transform duration-300">
                 <div class="success-checkmark">
-                    <div class="check-icon">
-                        <span class="icon-line line-tip"></span>
-                        <span class="icon-line line-long"></span>
+                    <div class="check-icon dark:border-green-400">
+                        <span class="icon-line line-tip dark:bg-green-400"></span>
+                        <span class="icon-line line-long dark:bg-green-400"></span>
                         <div class="icon-circle"></div>
                         <div class="icon-fix"></div>
                     </div>
                 </div>
-                <p class="text-center text-lg font-medium text-gray-700 mt-4">Meal Added!</p>
+                <p class="text-center text-lg font-medium text-gray-700 dark:text-gray-300 mt-4">Meal Added!</p>
             </div>
         </div>
     </template>
@@ -570,6 +570,21 @@
                 right: 8px;
                 top: 38px;
             }
+        }
+
+        /* Update success checkmark colors for dark mode */
+        .dark .check-icon {
+            border-color: #4ADE80;  /* green-400 */
+        }
+        
+        .dark .icon-line {
+            background-color: #4ADE80;  /* green-400 */
+        }
+
+        /* Update loading spinner for dark mode */
+        .dark .animate-spin {
+            border-color: #4ADE80;  /* green-400 */
+            border-top-color: transparent;
         }
     </style>
 </body>

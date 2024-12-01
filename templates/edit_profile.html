@@ -16,31 +16,38 @@
         }
     </script>
 </head>
-<body>
+<body class="bg-gray-50 dark:bg-gray-900">
     {% include 'header.html' %}
 
     <main class="container mx-auto px-4 py-8">
-        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-            <h1 class="text-2xl font-bold mb-6">Edit Profile</h1>
+        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Edit Profile</h1>
 
             <form method="POST" action="{{ url_for('edit_profile') }}">
                 <!-- Personal Information -->
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-gray-700 mb-2" for="name">Name</label>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" for="name">Name</label>
                         <input type="text" id="name" name="name" value="{{ user.name }}" 
-                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                               class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                      focus:outline-none focus:border-green-500 
+                                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-700 mb-2" for="age">Age</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-2" for="age">Age</label>
                             <input type="number" id="age" name="age" value="{{ user.age }}" 
-                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                                   class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                          focus:outline-none focus:border-green-500 
+                                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                         <div>
-                            <label class="block text-gray-700 mb-2" for="sex">Sex</label>
-                            <select id="sex" name="sex" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                            <label class="block text-gray-700 dark:text-gray-300 mb-2" for="sex">Sex</label>
+                            <select id="sex" name="sex" 
+                                    class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                           focus:outline-none focus:border-green-500 
+                                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 <option value="male" {% if user.sex == 'male' %}selected{% endif %}>Male</option>
                                 <option value="female" {% if user.sex == 'female' %}selected{% endif %}>Female</option>
                             </select>
@@ -49,41 +56,43 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-700 mb-2" for="weight">Weight (kg)</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-2" for="weight">Weight (kg)</label>
                             <input type="number" step="0.1" id="weight" name="weight" value="{{ user.weight }}" 
-                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                                   class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                          focus:outline-none focus:border-green-500 
+                                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                         <div>
-                            <label class="block text-gray-700 mb-2">Height</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-2">Height</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-gray-700 mb-2" for="height_ft">Height (ft)</label>
-                                    <input type="number" 
-                                           id="height_ft" 
-                                           name="height_ft" 
+                                    <label class="block text-gray-700 dark:text-gray-300 mb-2" for="height_ft">Height (ft)</label>
+                                    <input type="number" id="height_ft" name="height_ft" 
                                            value="{{ ((user.height or 0) / 30.48) | int }}"
                                            placeholder="Feet"
-                                           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                                           class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                                  focus:outline-none focus:border-green-500 
+                                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-gray-700 mb-2" for="height_in">Height (in)</label>
-                                    <input type="number" 
-                                           id="height_in" 
-                                           name="height_in" 
+                                    <label class="block text-gray-700 dark:text-gray-300 mb-2" for="height_in">Height (in)</label>
+                                    <input type="number" id="height_in" name="height_in" 
                                            value="{{ ((user.height or 0) / 2.54) % 12 | int }}"
                                            placeholder="Inches"
-                                           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                                           class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                                  focus:outline-none focus:border-green-500 
+                                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 </div>
                             </div>
-                            <!-- Hidden input for centimeters -->
-                            <input type="hidden" id="height" name="height" value="{{ user.height or 0 }}">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-gray-700 mb-2" for="activity_level">Activity Level</label>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" for="activity_level">Activity Level</label>
                         <select id="activity_level" name="activity_level" 
-                                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                                class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                       focus:outline-none focus:border-green-500 
+                                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="sedentary" {% if user.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
                             <option value="light" {% if user.activity_level == 'light' %}selected{% endif %}>Light Active</option>
                             <option value="moderate" {% if user.activity_level == 'moderate' %}selected{% endif %}>Moderately Active</option>
@@ -93,9 +102,11 @@
                     </div>
 
                     <div>
-                        <label class="block text-gray-700 mb-2" for="goal">Goal</label>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" for="goal">Goal</label>
                         <select id="goal" name="goal" 
-                                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+                                class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                       focus:outline-none focus:border-green-500 
+                                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="maintain" {% if user.goal == 'maintain' %}selected{% endif %}>Maintain Weight</option>
                             <option value="lose" {% if user.goal == 'lose' %}selected{% endif %}>Weight Loss</option>
                             <option value="extreme_lose" {% if user.goal == 'extreme_lose' %}selected{% endif %}>Extreme Weight Loss</option>
@@ -104,14 +115,19 @@
                     </div>
 
                     <div>
-                        <label class="block text-gray-700 mb-2" for="dietary_restrictions">Dietary Restrictions</label>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" for="dietary_restrictions">Dietary Restrictions</label>
                         <textarea id="dietary_restrictions" name="dietary_restrictions" rows="3" 
-                                  class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-green-500">{{ user.dietary_restrictions }}</textarea>
+                                  class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg 
+                                         focus:outline-none focus:border-green-500 
+                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ user.dietary_restrictions }}</textarea>
                     </div>
                 </div>
 
                 <div class="mt-6">
-                    <button type="submit" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    <button type="submit" 
+                            class="w-full px-4 py-2 bg-green-500 hover:bg-green-600 
+                                   dark:bg-green-600 dark:hover:bg-green-700 
+                                   text-white rounded-lg transition-colors">
                         Update Profile
                     </button>
                 </div>
