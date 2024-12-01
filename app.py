@@ -723,15 +723,17 @@ def dashboard():
 
         # Calculate target calories for each meal type
         meal_calories_target = {
-            'breakfast': goal_calories * 0.25,  # 25% of daily calories
-            'lunch': goal_calories * 0.35,      # 35% of daily calories
-            'dinner': goal_calories * 0.30,     # 30% of daily calories
-            'snack': goal_calories * 0.10       # 10% of daily calories
+            'breakfast': goal_calories * 0.30,  # 30% of daily calories (increased from 25%)
+            'lunch': goal_calories * 0.35,      # 35% of daily calories (unchanged)
+            'dinner': goal_calories * 0.25,     # 25% of daily calories (decreased from 30%)
+            'snack': goal_calories * 0.10       # 10% of daily calories (unchanged)
         }
 
-        # Define acceptable calorie range (±20% of target)
+        # Define acceptable calorie range (±30% of target)
         def get_calorie_range(target_calories):
-            return (target_calories * 0.8, target_calories * 1.2)
+            min_calories = target_calories * 0.7
+            max_calories = target_calories * 1.3
+            return (min_calories, max_calories)
 
         # Get user's dietary preference
         preference = session.get('current_meal_plan_preference') or user.dietary_preference
@@ -749,11 +751,14 @@ def dashboard():
                     Recipe.energy_per_serving_kcal >= min_calories,
                     Recipe.energy_per_serving_kcal <= max_calories
                 )
-                .order_by(db.func.random())
+                .order_by(
+                    db.func.abs(Recipe.energy_per_serving_kcal - target_calories)  # Order by closest to target
+                )
+                .limit(3)  # Get top 3 closest matches
                 .first()
             )
             
-            # Fallback if no recipe found within range
+            # If no recipes found within range, get the closest available
             if meal_recommendations[meal_type] is None:
                 meal_recommendations[meal_type] = (
                     base_query
@@ -847,16 +852,16 @@ def get_different_meals(meal_type):
 
         # Calculate target calories for each meal type
         meal_calories_target = {
-            'breakfast': goal_calories * 0.25,  # 25% of daily calories
-            'lunch': goal_calories * 0.35,      # 35% of daily calories
-            'dinner': goal_calories * 0.30,     # 30% of daily calories
-            'snack': goal_calories * 0.10       # 10% of daily calories
+            'breakfast': goal_calories * 0.30,  # 30% of daily calories (increased from 25%)
+            'lunch': goal_calories * 0.35,      # 35% of daily calories (unchanged)
+            'dinner': goal_calories * 0.25,     # 25% of daily calories (decreased from 30%)
+            'snack': goal_calories * 0.10       # 10% of daily calories (unchanged)
         }
 
-        # Get calorie range for the specific meal type (±20% of target)
+        # Get calorie range for the specific meal type (±30% of target)
         target_calories = meal_calories_target[meal_type]
-        min_calories = target_calories * 0.8
-        max_calories = target_calories * 1.2
+        min_calories = target_calories * 0.7
+        max_calories = target_calories * 1.3
 
         # Get preference
         preference = request.args.get('preference') or session.get('current_meal_plan_preference') or user.dietary_preference
