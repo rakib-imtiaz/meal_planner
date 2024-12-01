@@ -821,16 +821,6 @@ def get_different_meals(meal_type):
         # Get preference from query parameter or fall back to session/user preference
         preference = request.args.get('preference') or session.get('current_meal_plan_preference') or user.dietary_preference
         
-        # Debug prints
-        print(f"User ID: {user.id}")
-        print(f"Meal Type: {meal_type}")
-        print(f"Dietary Preference: {preference}")
-        
-        # Normalize meal type
-        meal_type = meal_type.lower()
-        if meal_type == 'snack':
-            meal_type = 'snacks'
-        
         # Build the query
         query = Recipe.query
         
@@ -847,18 +837,6 @@ def get_different_meals(meal_type):
         # Get random recipes
         new_meals = query.order_by(db.func.random()).limit(3).all()
         
-        # Debug print
-        print(f"Found {len(new_meals)} meals")
-        for meal in new_meals:
-            print(f"- {meal.name} (Vegetarian: {meal.is_vegetarian})")
-        
-        if not new_meals:
-            print("No meals found matching criteria")
-            return jsonify({
-                'success': False,
-                'error': 'No meals found matching the criteria'
-            }), 404
-        
         # Format the response
         formatted_meals = []
         for recipe in new_meals:
@@ -873,7 +851,9 @@ def get_different_meals(meal_type):
                     'fat_per_serving_g': float(recipe.fat_per_serving_g or 0),
                     'serving_size': int(recipe.serving_size or 1),
                     'meal_type': meal_type,
-                    'is_vegetarian': recipe.is_vegetarian
+                    'is_vegetarian': recipe.is_vegetarian,
+                    'ingredients': recipe.ingredients or 'No ingredients available',
+                    'instructions': recipe.instructions or 'No instructions available'
                 }
                 formatted_meals.append(formatted_meal)
             except Exception as format_error:
