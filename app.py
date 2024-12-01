@@ -605,8 +605,8 @@ def edit_profile():
             user.height = float(request.form.get('height', 0))
             user.activity_level = request.form.get('activity_level')
             user.goal = request.form.get('goal')
-            # Add vegetarian preference
-            user.is_vegetarian = request.form.get('is_vegetarian') == 'true'
+            # Convert is_vegetarian to boolean
+            user.is_vegetarian = request.form.get('is_vegetarian') == '1'
             
             # Validate required fields
             if not all([user.name, user.age, user.sex, user.weight, user.height, user.activity_level, user.goal]):
@@ -624,10 +624,7 @@ def edit_profile():
             db.session.rollback()
             flash(f'Error updating profile: {str(e)}', 'error')
     
-    return render_template('edit_profile.html', 
-                         user=user,
-                         activity_levels=['Sedentary', 'Light', 'Moderate', 'Very Active', 'Super Active'],
-                         goals=['Maintain', 'Weight loss', 'Extreme weight loss', 'Weight gain'])
+    return render_template('edit_profile.html', user=user)
 
 @app.route('/dashboard')
 @login_required

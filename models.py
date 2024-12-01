@@ -22,6 +22,7 @@ class User(db.Model):
     dietary_restrictions = db.Column(db.String(255))
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
     updated_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    is_vegetarian = db.Column(db.Boolean, default=False)
 
     favorite_recipes = db.relationship('UserFavorite', backref='user', lazy='dynamic', cascade="all, delete-orphan")
     ratings = db.relationship('UserRating', backref='user', lazy='dynamic', cascade="all, delete-orphan")
