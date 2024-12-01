@@ -605,8 +605,15 @@ def edit_profile():
             user.height = float(request.form.get('height', 0))
             user.activity_level = request.form.get('activity_level')
             user.goal = request.form.get('goal')
-            # Convert is_vegetarian to boolean
-            user.is_vegetarian = request.form.get('is_vegetarian') == '1'
+            # Convert is_vegetarian to boolean and update preference
+            is_vegetarian = request.form.get('is_vegetarian') == '1'
+            user.is_vegetarian = is_vegetarian
+            
+            # Update the session preference based on vegetarian choice
+            if is_vegetarian:
+                session['current_meal_plan_preference'] = 'vegetarian'
+            else:
+                session['current_meal_plan_preference'] = 'non-vegetarian'
             
             # Validate required fields
             if not all([user.name, user.age, user.sex, user.weight, user.height, user.activity_level, user.goal]):
@@ -734,14 +741,9 @@ def dashboard():
             target_calories = meal_calories_target[meal_type]
             min_calories, max_calories = get_calorie_range(target_calories)
             
-            # Build query with dietary preference
-            query = base_query
-            if preference == 'vegetarian':
-                query = query.filter(Recipe.is_vegetarian == True)
-            
             # Query recipes within the calorie range for the meal type
             meal_recommendations[meal_type] = (
-                query
+                base_query
                 .filter(
                     getattr(Recipe, f'is_{meal_type}') == True,
                     Recipe.energy_per_serving_kcal >= min_calories,
@@ -754,7 +756,7 @@ def dashboard():
             # Fallback if no recipe found within range
             if meal_recommendations[meal_type] is None:
                 meal_recommendations[meal_type] = (
-                    query
+                    base_query
                     .filter(getattr(Recipe, f'is_{meal_type}') == True)
                     .order_by(
                         db.func.abs(Recipe.energy_per_serving_kcal - target_calories)
@@ -817,25 +819,81 @@ def browse_recipes():
 def get_different_meals(meal_type):
     try:
         user = db.session.get(User, session['user_id'])
+        recommender = DietRecommender()
         
-        # Get preference from query parameter or fall back to session/user preference
+        # Calculate BMR and activity multiplier
+        activity_multipliers = {
+            'sedentary': 1.2,
+            'light': 1.375,
+            'moderate': 1.55,
+            'very': 1.725,
+            'super': 1.9
+        }
+        activity_multiplier = activity_multipliers.get(user.activity_level, 1.55)
+        
+        # Calculate BMR and maintenance calories
+        bmr = recommender.calculate_bmr(user)
+        maintenance_calories = bmr * activity_multiplier
+        
+        # Calculate goal-based calories
+        if user.goal == "lose":
+            goal_calories = round(maintenance_calories * 0.8)  # 20% deficit
+        elif user.goal == "extreme_lose":
+            goal_calories = round(maintenance_calories * 0.6)  # 40% deficit
+        elif user.goal == "gain":
+            goal_calories = round(maintenance_calories * 1.2)  # 20% surplus
+        else:  # maintain
+            goal_calories = round(maintenance_calories)
+
+        # Calculate target calories for each meal type
+        meal_calories_target = {
+            'breakfast': goal_calories * 0.25,  # 25% of daily calories
+            'lunch': goal_calories * 0.35,      # 35% of daily calories
+            'dinner': goal_calories * 0.30,     # 30% of daily calories
+            'snack': goal_calories * 0.10       # 10% of daily calories
+        }
+
+        # Get calorie range for the specific meal type (±20% of target)
+        target_calories = meal_calories_target[meal_type]
+        min_calories = target_calories * 0.8
+        max_calories = target_calories * 1.2
+
+        # Get preference
         preference = request.args.get('preference') or session.get('current_meal_plan_preference') or user.dietary_preference
         
-        # Build the query
+        # Build query with dietary preference and calorie range
         query = Recipe.query
+        if preference == 'vegetarian':
+            query = query.filter(Recipe.is_vegetarian == True)
         
-        # Add meal type filter
-        if meal_type == 'snacks':
+        # Add meal type and calorie range filters
+        if meal_type == 'snack':
             query = query.filter(Recipe.is_snack == True)
         else:
             query = query.filter(getattr(Recipe, f'is_{meal_type}') == True)
         
-        # Add dietary preference filter
-        if preference == 'vegetarian':
-            query = query.filter(Recipe.is_vegetarian == True)
-        
-        # Get random recipes
-        new_meals = query.order_by(db.func.random()).limit(3).all()
+        # Get recipes within calorie range
+        new_meals = (
+            query
+            .filter(
+                Recipe.energy_per_serving_kcal >= min_calories,
+                Recipe.energy_per_serving_kcal <= max_calories
+            )
+            .order_by(db.func.random())
+            .limit(3)
+            .all()
+        )
+
+        # If no meals found within range, get closest matches
+        if not new_meals:
+            new_meals = (
+                query
+                .order_by(
+                    db.func.abs(Recipe.energy_per_serving_kcal - target_calories)
+                )
+                .limit(3)
+                .all()
+            )
         
         # Format the response
         formatted_meals = []
