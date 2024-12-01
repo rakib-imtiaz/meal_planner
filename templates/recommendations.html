@@ -68,7 +68,7 @@
                     </button>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="meals-container-{{ meal_type }}">
                         {% for recipe in recipes %}
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-xl">
+                        <div class="recipe-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300">
                             <!-- Recipe Image Section -->
                             {% if recipe.image %}
                             <div class="relative group">
@@ -103,6 +103,7 @@
 
                                 <!-- Collapsible Sections -->
                                 <div class="mt-4 space-y-2">
+                                    <!-- Ingredients Section -->
                                     <button onclick="toggleSection('ingredients-{{ loop.index }}')" 
                                             class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <span class="text-green-600 dark:text-green-400 font-semibold">Ingredients</span>
@@ -113,6 +114,20 @@
                                          class="hidden transition-all duration-300 overflow-hidden">
                                         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
                                             {{ recipe.ingredients }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Instructions Section -->
+                                    <button onclick="toggleSection('instructions-{{ loop.index }}')" 
+                                            class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <span class="text-green-600 dark:text-green-400 font-semibold">Instructions</span>
+                                        <i class="fas fa-chevron-down text-green-600 dark:text-green-400 transition-transform duration-300" 
+                                           id="instructions-icon-{{ loop.index }}"></i>
+                                    </button>
+                                    <div id="instructions-{{ loop.index }}" 
+                                         class="hidden transition-all duration-300 overflow-hidden">
+                                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+                                            {{ recipe.instructions }}
                                         </div>
                                     </div>
                                 </div>
@@ -212,16 +227,16 @@
 
     function toggleSection(id) {
         const element = document.getElementById(id);
-        const iconId = id.replace('ingredients', 'ingredients-icon');
+        const iconId = id.replace('ingredients', 'ingredients-icon').replace('instructions', 'instructions-icon');
         const icon = document.getElementById(iconId);
         
         if (element.classList.contains('hidden')) {
             element.classList.remove('hidden');
             element.style.maxHeight = element.scrollHeight + 'px';
-            icon.style.transform = 'rotate(180deg)';
+            icon.style.opacity = '0.5';
         } else {
             element.style.maxHeight = '0px';
-            icon.style.transform = 'rotate(0deg)';
+            icon.style.opacity = '1';
             setTimeout(() => {
                 element.classList.add('hidden');
             }, 300);
@@ -250,18 +265,19 @@
                 console.log('Received data:', data); // Debug log
                 
                 if (data.success && data.meals && data.meals.length > 0) {
-                    container.innerHTML = data.meals.map(recipe => `
-                        <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
+                    container.innerHTML = data.meals.map((recipe, index) => `
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                             ${recipe.image ? 
                                 `<img src="${recipe.image}" alt="${recipe.name}" class="w-full h-48 object-cover">` :
-                                `<div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                `<div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                     <span class="text-gray-400">No image available</span>
                                 </div>`
                             }
                             
                             <div class="p-6">
-                                <h3 class="text-xl font-semibold mb-3">${recipe.name}</h3>
+                                <h3 class="text-xl font-semibold mb-3 text-gray-800 dark:text-white">${recipe.name}</h3>
                                 
+                                <!-- Nutritional Info -->
                                 <div class="space-y-2 mb-4">
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">Calories:</span>
@@ -278,6 +294,37 @@
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">Fat:</span>
                                         <span class="font-semibold">${recipe.fat_per_serving_g}g</span>
+                                    </div>
+                                </div>
+
+                                <!-- Collapsible Sections -->
+                                <div class="mt-4 space-y-2">
+                                    <!-- Ingredients Section -->
+                                    <button onclick="toggleSection('ingredients-new-${index}')" 
+                                            class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <span class="text-green-600 dark:text-green-400 font-semibold">Ingredients</span>
+                                        <i class="fas fa-chevron-down text-green-600 dark:text-green-400 transition-transform duration-300" 
+                                           id="ingredients-icon-new-${index}"></i>
+                                    </button>
+                                    <div id="ingredients-new-${index}" 
+                                         class="hidden transition-all duration-300 overflow-hidden">
+                                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+                                            ${recipe.ingredients || 'No ingredients available'}
+                                        </div>
+                                    </div>
+
+                                    <!-- Instructions Section -->
+                                    <button onclick="toggleSection('instructions-new-${index}')" 
+                                            class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <span class="text-green-600 dark:text-green-400 font-semibold">Instructions</span>
+                                        <i class="fas fa-chevron-down text-green-600 dark:text-green-400 transition-transform duration-300" 
+                                           id="instructions-icon-new-${index}"></i>
+                                    </button>
+                                    <div id="instructions-new-${index}" 
+                                         class="hidden transition-all duration-300 overflow-hidden">
+                                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+                                            ${recipe.instructions || 'No instructions available'}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -313,57 +360,51 @@
         animation-duration: 1s;
     }
 
-    .animate__fadeInLeft {
-        animation-name: fadeInLeft;
-    }
-
-    .animate__fadeInRight {
-        animation-name: fadeInRight;
-    }
-
-    .animate__fadeInUp {
-        animation-name: fadeInUp;
-    }
-
     @keyframes fadeInLeft {
         from {
             opacity: 0;
-            transform: translate3d(-100%, 0, 0);
+            transform: translateX(-100%);
         }
         to {
             opacity: 1;
-            transform: translate3d(0, 0, 0);
+            transform: translateX(0);
         }
     }
 
     @keyframes fadeInRight {
         from {
             opacity: 0;
-            transform: translate3d(100%, 0, 0);
+            transform: translateX(100%);
         }
         to {
             opacity: 1;
-            transform: translate3d(0, 0, 0);
+            transform: translateX(0);
         }
     }
 
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translate3d(0, 100%, 0);
+            transform: translateY(20px);
         }
         to {
             opacity: 1;
-            transform: translate3d(0, 0, 0);
+            transform: translateY(0);
         }
     }
 
     .fa-chevron-down {
-        transition: transform 0.2s ease-in-out;
+        transition: opacity 0.2s ease-in-out;
     }
 
-    .border-l-2 {
-        transition: all 0.3s ease-in-out;
+    .recipe-card {
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+    }
+
+    .recipe-card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
     }
 
     .nutrition-bar {
@@ -378,12 +419,7 @@
             transform: translateX(0);
         }
     }
-    
-    .nutrition-bar:nth-child(1) { animation-delay: 0.1s; }
-    .nutrition-bar:nth-child(2) { animation-delay: 0.2s; }
-    .nutrition-bar:nth-child(3) { animation-delay: 0.3s; }
-    .nutrition-bar:nth-child(4) { animation-delay: 0.4s; }
-    </style>
+</style>
 
     <script>
         tailwind.config = {
